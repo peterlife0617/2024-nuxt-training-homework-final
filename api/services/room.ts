@@ -1,14 +1,15 @@
 import type { FetchOptions } from 'ofetch'
-import type { GetRoomResponse } from '../models/room'
-import type { ApiResponse } from '../types/api-response'
-import { apiInstance } from '../api'
-import { useApiFactory } from '../helper/factory'
+import { useApiFactory } from '../helper/use-api-factory'
+import { apiInstance } from '../instance'
+import { roomListResponseSchema, roomResponseSchema } from '../schemas/room'
 
-export function useRoomService() {
+export function useRoomApi() {
+  const BASE_PATH = '/rooms'
+
   const api = useApiFactory(apiInstance)
 
   return {
-    /** 取得房型詳細資料 */
-    getRoom: (id: string, options?: FetchOptions) => api.get<ApiResponse<GetRoomResponse>>(`/rooms/${id}`, options),
+    getRoomList: (options?: FetchOptions) => api.get(BASE_PATH, options, { responseSchema: roomListResponseSchema }),
+    getRoom: (id: string, options?: FetchOptions) => api.get(`${BASE_PATH}/${id}`, options, { responseSchema: roomResponseSchema }),
   }
 }

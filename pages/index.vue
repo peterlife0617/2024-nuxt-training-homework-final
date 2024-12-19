@@ -2,8 +2,9 @@
 import { Icon } from '@iconify/vue'
 import { Autoplay, Navigation, Pagination } from 'swiper/modules'
 
-import { Swiper, SwiperSlide } from 'swiper/vue'
-
+import { useHomeCulinaryApi } from '~/api/services/home-culinary'
+import { useHomeNewsApi } from '~/api/services/home-news'
+import { useRoomApi } from '~/api/services/room'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
@@ -12,50 +13,49 @@ definePageMeta({
   name: 'home',
 })
 
-const modules = ref([Autoplay, Navigation, Pagination])
+const { getRoomList } = useRoomApi()
+const { getHomeNewsList } = useHomeNewsApi()
+const { getHomeCulinaryList } = useHomeCulinaryApi()
 
-const roomSwiper = useTemplateRef('roomSwiper')
+const { data } = await useAsyncData(async () => {
+  const [roomList, homeNewsList, culinaryList] = await getApiData([getRoomList(), getHomeNewsList(), getHomeCulinaryList()])
+  return {
+    roomList: roomList?.result,
+    homeNewsList: homeNewsList?.result,
+    culinaryList: culinaryList?.result,
+  }
+})
 
-function slidePrev() {
-  roomSwiper.value?.$el.swiper.slidePrev()
-}
+const modules = [Autoplay, Navigation, Pagination]
 
-function slideNext() {
-  roomSwiper.value?.$el.swiper.slideNext()
-}
+const roomSwiperRef = useTemplateRef('roomSwiper')
+
+const { slidePrev, slideNext } = useSwiper(roomSwiperRef)
+
+const firstRoom = computed(() => data.value?.roomList?.[0])
 </script>
 
 <template>
   <main class="overflow-hidden">
     <section class="hero position-relative">
       <Swiper
-        :modules="modules"
-        :slides-per-view="1"
-        :pagination="true"
+        :modules="modules" :slides-per-view="1" :pagination="true"
         :autoplay="{
           delay: 3000,
           disableOnInteraction: false,
         }"
       >
-        <SwiperSlide
-          v-for="(num, index) in 5"
-          :key="index"
-        >
+        <SwiperSlide v-for="(room, index) in data?.roomList" :key="room._id">
           <picture>
-            <source
-              srcset="/images/home-hero.png"
-              media="(min-width:576px)"
-            >
-            <img
-              class="hero-img"
-              src="/images/home-hero-sm.png"
-              alt="hero banner"
-            >
+            <source :srcset="room.imageUrl" media="(min-width:576px)">
+            <img class="hero-img" :src="room.imageUrl" :alt="`hero banner ${index + 1}`">
           </picture>
         </SwiperSlide>
       </Swiper>
 
-      <div class="hero-wrapper d-flex flex-column justify-content-center align-items-center flex-md-row justify-content-md-between gap-md-10 w-100 px-md-20 position-absolute z-2">
+      <div
+        class="hero-wrapper d-flex flex-column justify-content-center align-items-center flex-md-row justify-content-md-between gap-md-10 w-100 px-md-20 position-absolute z-2"
+      >
         <div class="d-flex flex-column align-items-center text-center d-md-block text-md-start">
           <div class="mt-10 mb-5 mt-md-0 mb-md-10 text-primary-100 fw-bold">
             <h2>
@@ -100,78 +100,20 @@ function slideNext() {
           </div>
           <div class="col-12 col-md-10 d-flex flex-column gap-10">
             <div
+              v-for="homeNews in data?.homeNewsList" :key="homeNews._id"
               class="card bg-transparent border-0"
             >
               <div class="d-flex flex-column flex-md-row align-items-center gap-6">
                 <picture>
-                  <source
-                    srcset="/images/home-news-1.png"
-                    media="(min-width: 576px)"
-                  >
-                  <img
-                    src="/images/home-news-sm-1.png"
-                    class="w-100 rounded-3"
-                    alt="可看見海景及泳池的套房"
-                  >
+                  <source :srcset="homeNews.image" media="(min-width: 576px)">
+                  <img :src="homeNews.image" class="w-100 rounded-3" alt="">
                 </picture>
                 <div class="card-body p-0">
                   <h3 class="card-title mb-2 mb-md-6 fw-bold">
-                    秋季旅遊，豪華享受方案
+                    {{ homeNews.title }}
                   </h3>
                   <p class="card-text text-neutral-80 fs-8 fs-md-7 fw-medium">
-                    秋天就是要來場豪華的旅遊！我們為您準備了一系列的秋季特別方案，包括舒適的住宿、美食饗宴，以及精彩的活動。不論您是想來一趟浪漫之旅，還是想和家人共度美好時光，都能在這裡找到最適合的方案。
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="card bg-transparent border-0"
-            >
-              <div class="d-flex flex-column flex-md-row align-items-center gap-6">
-                <picture>
-                  <source
-                    srcset="/images/home-news-2.png"
-                    media="(min-width: 576px)"
-                  >
-                  <img
-                    src="/images/home-news-sm-2.png"
-                    class="w-100 rounded-3"
-                    alt="在雙人床上的兩顆灰色枕頭"
-                  >
-                </picture>
-                <div class="card-body p-0">
-                  <h3 class="card-title mb-2 mb-md-6 fw-bold">
-                    輕鬆住房專案
-                  </h3>
-                  <p class="card-text text-neutral-80 fs-8 fs-md-7 fw-medium">
-                    我們知道，有時候您只是需要一個舒適的地方放鬆心情。因此，我們推出了「輕鬆住房專案」，讓您無壓力地享受住宿。不管是短期的休息，還是長期的住宿，我們都會以最貼心的服務，讓您感到賓至如歸。
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="card bg-transparent border-0"
-            >
-              <div class="d-flex flex-column flex-md-row align-items-center gap-6">
-                <picture>
-                  <source
-                    srcset="/images/home-news-3.png"
-                    media="(min-width: 576px)"
-                  >
-                  <img
-                    src="/images/home-news-sm-3.png"
-                    class="w-100 rounded-3"
-                    alt="坐在沙發上的聖誕麋鹿玩偶"
-                  >
-                </picture>
-                <div class="card-body p-0">
-                  <h3 class="card-title mb-2 mb-md-6 fw-bold">
-                    耶誕快樂，住房送禮
-                  </h3>
-                  <p class="card-text text-neutral-80 fs-8 fs-md-7 fw-medium">
-                    聖誕節來臨，我們為您準備了特別的禮物！在聖誕期間訂房，不僅有特別優惠，還會送上我們精心準備的聖誕禮物。讓我們一起慶祝這個溫馨的節日吧！
+                    {{ homeNews.description }}
                   </p>
                 </div>
               </div>
@@ -212,46 +154,34 @@ function slideNext() {
       </div>
     </section>
 
-    <section class="room-intro position-relative px-3 py-20 px-md-0 py-md-30 bg-neutral-120">
-      <div class="d-flex flex-column flex-md-row justify-content-center align-items-center justify-content-md-start align-items-md-end gap-6 gap-md-20">
+    <section v-if="firstRoom" class="room-intro position-relative px-3 py-20 px-md-0 py-md-30 bg-neutral-120">
+      <div
+        class="d-flex flex-column flex-md-row justify-content-center align-items-center justify-content-md-start align-items-md-end gap-6 gap-md-20"
+      >
         <Swiper
-          ref="roomSwiper"
-          :modules="modules"
-          :slides-per-view="1"
-          :pagination="true"
+          ref="roomSwiper" :modules="modules" :slides-per-view="1" :pagination="true"
           :autoplay="{
             delay: 5000,
             disableOnInteraction: false,
-          }"
-          :loop="true"
+          }" :loop="true"
         >
-          <SwiperSlide
-            v-for="(num, index) in 5"
-            :key="index"
-          >
+          <SwiperSlide v-for="(imageUrl, index) in firstRoom.imageUrlList" :key="index">
             <picture>
-              <source
-                srcset="/images/home-room-1.png"
-                media="(min-width:768px)"
-              >
-              <img
-                class="w-100"
-                src="/images/home-room-sm-1.png"
-                alt="room-a"
-              >
+              <source :srcset="imageUrl" media="(min-width:768px)">
+              <img class="w-100" :src="imageUrl" :alt="`room ${index + 1}`">
             </picture>
           </SwiperSlide>
         </Swiper>
 
         <div class="room-intro-content text-neutral-0">
           <h2 class="mb-2 mb-md-4 fw-bold">
-            尊爵雙人房
+            {{ firstRoom.name }}
           </h2>
           <p class="mb-6 mb-md-10 fs-8 fs-md-7">
-            享受高級的住宿體驗，尊爵雙人房提供給您舒適寬敞的空間和精緻的裝潢。
+            {{ firstRoom.description }}
           </p>
           <div class="mb-6 mb-md-10 fs-3 fw-bold">
-            NT$ 10,000
+            {{ formatCurrency(firstRoom.price) }}
           </div>
           <NuxtLink
             to="/rooms"
@@ -263,27 +193,19 @@ function slideNext() {
           <div class="d-flex justify-content-end">
             <button
               class="bg-transparent text-primary-100 icon-link icon-link-hover border-0"
-              type="button"
-              @click="slidePrev"
+              type="button" @click="slidePrev"
             >
               <Icon
-                icon="mdi:arrow-left"
-                class="bi m-4"
-                style="font-size: 1.5rem;
+                icon="mdi:arrow-left" class="bi m-4" style="font-size: 1.5rem;
 
  --bs-icon-link-transform: translateX(-0.25em);"
               />
             </button>
             <button
               class="bg-transparent text-primary-100 icon-link icon-link-hover border-0"
-              type="button"
-              @click="slideNext"
+              type="button" @click="slideNext"
             >
-              <Icon
-                icon="mdi:arrow-right"
-                class="bi m-4"
-                style="font-size: 1.5rem;"
-              />
+              <Icon icon="mdi:arrow-right" class="bi m-4" style="font-size: 1.5rem;" />
             </button>
           </div>
         </div>
@@ -299,161 +221,25 @@ function slideNext() {
           <div class="deco-line" />
         </div>
         <div class="row flex-nowrap overflow-x-auto">
-          <div class="col-10 col-md-6 col-xl-4">
-            <div
-              class="card position-relative border-0 rounded-3"
-            >
+          <div v-for="culinary in data?.culinaryList" :key="culinary._id" class="col-10 col-md-6 col-xl-4">
+            <div class="card position-relative border-0 rounded-3">
               <picture>
-                <source
-                  srcset="/images/home-food-1.png"
-                  media="(min-width: 576px)"
-                >
-                <img
-                  class="w-100 rounded-3"
-                  src="/images/home-food-sm-1.png"
-                  alt="海霸"
-                >
+                <source :srcset="culinary.image" media="(min-width: 576px)">
+                <img class="w-100 rounded-3" :src="culinary.image" :alt="culinary.title">
               </picture>
-              <div class="card-body position-absolute bottom-0 p-4 p-md-6 rounded-bottom-3  text-neutral-0">
+              <div
+                class="card-body position-absolute bottom-0 p-4 p-md-6 rounded-bottom-3  text-neutral-0"
+              >
                 <div class="d-flex justify-content-between align-items-center mb-4 mb-md-6">
                   <h5 class="card-title mb-0 fw-bold">
-                    海霸
+                    {{ culinary.title }}
                   </h5>
                   <div class="d-flex justify-content-between gap-4 text-neutral-40 fs-8 fs-md-7">
-                    <span class="fw-bold">SUN-MON</span>
-                    <span class="fw-bold">11:00 - 20:30</span>
+                    <span v-for="(time, index) in culinary.diningTime.split(' ')" :key="index" class="fw-bold">{{ time }}</span>
                   </div>
                 </div>
                 <p class="card-text fs-8 fs-md-7">
-                  以新鮮海產料理聞名，我們的專業廚師選用高雄當地的海鮮，每一道菜都充滿海洋的鮮美與清甜。無論是烤魚、蒸蝦還是煮蛤蜊，都能讓您品嚐到最新鮮的海洋風味。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-10 col-md-6 col-xl-4">
-            <div
-              class="card position-relative border-0 rounded-3"
-            >
-              <picture>
-                <source
-                  srcset="/images/home-food-2.png"
-                  media="(min-width: 576px)"
-                >
-                <img
-                  class="w-100 rounded-3"
-                  src="/images/home-food-sm-2.png"
-                  alt="日食"
-                >
-              </picture>
-              <div class="card-body position-absolute bottom-0 p-4 p-md-6 rounded-bottom-3  text-neutral-0">
-                <div class="d-flex justify-content-between align-items-center mb-4 mb-md-6">
-                  <h5 class="card-title mb-0 fw-bold">
-                    日食
-                  </h5>
-                  <div class="d-flex justify-content-between gap-4 text-neutral-40 fs-8 fs-md-7">
-                    <span class="fw-bold">SUN-MON</span>
-                    <span class="fw-bold">17:00 - 22:00</span>
-                  </div>
-                </div>
-                <p class="card-text fs-8 fs-md-7">
-                  為您提供優質的牛排，每一塊肉都來自頂級的牛肉，經過專業廚師的巧手烹調，口感豐滿、風味絕佳。搭配我們的特製醬料，讓您的味蕾享受一場美味的盛宴。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-10 col-md-6 col-xl-4">
-            <div
-              class="card position-relative border-0 rounded-3"
-            >
-              <picture>
-                <source
-                  srcset="/images/home-food-3.png"
-                  media="(min-width: 576px)"
-                >
-                <img
-                  class="w-100 rounded-3"
-                  src="/images/home-food-sm-3.png"
-                  alt="山臻"
-                >
-              </picture>
-              <div class="card-body position-absolute bottom-0 p-4 p-md-6 rounded-bottom-3  text-neutral-0">
-                <div class="d-flex justify-content-between align-items-center mb-4 mb-md-6">
-                  <h5 class="card-title mb-0 fw-bold">
-                    山臻
-                  </h5>
-                  <div class="d-flex justify-content-between gap-4 text-neutral-40 fs-8 fs-md-7">
-                    <span class="fw-bold">SUN-MON</span>
-                    <span class="fw-bold">11:30 - 20:30</span>
-                  </div>
-                </div>
-                <p class="card-text fs-8 fs-md-7">
-                  帶您進入一次辣味與鮮香兼具的川菜美食之旅。我們的廚師掌握正宗的川菜烹調技巧，從麻辣鍋到口水雞，每一道菜都有其獨特的風味，讓您回味無窮。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-10 col-md-6 col-xl-4">
-            <div
-              class="card position-relative border-0 rounded-3"
-            >
-              <picture>
-                <source
-                  srcset="/images/home-food-4.png"
-                  media="(min-width: 576px)"
-                >
-                <img
-                  class="w-100 rounded-3"
-                  src="/images/home-food-sm-4.png"
-                  alt="月永"
-                >
-              </picture>
-              <div class="card-body position-absolute bottom-0 p-4 p-md-6 rounded-bottom-3  text-neutral-0">
-                <div class="d-flex justify-content-between align-items-center mb-4 mb-md-6">
-                  <h5 class="card-title mb-0 fw-bold">
-                    月永
-                  </h5>
-                  <div class="d-flex justify-content-between gap-4 text-neutral-40 fs-8 fs-md-7">
-                    <span class="fw-bold">SUN-MON</span>
-                    <span class="fw-bold">11:00 - 20:00</span>
-                  </div>
-                </div>
-                <p class="card-text fs-8 fs-md-7">
-                  從鮮美的海鮮、經典的牛排，到各國的特色美食，我們都一應俱全。在這裡，您可以品嚐到世界各地的美食，每一道菜都由專業廚師用心製作，讓您在享受美食的同時，也能感受到我們的熱情與用心。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-10 col-md-6 col-xl-4">
-            <div
-              class="card position-relative border-0 rounded-3"
-            >
-              <picture>
-                <source
-                  srcset="/images/home-food-5.png"
-                  media="(min-width: 576px)"
-                >
-                <img
-                  class="w-100 rounded-3"
-                  src="/images/home-food-sm-5.png"
-                  alt="天潮"
-                >
-              </picture>
-              <div class="card-body position-absolute bottom-0 p-4 p-md-6 rounded-bottom-3  text-neutral-0">
-                <div class="d-flex justify-content-between align-items-center mb-4 mb-md-6">
-                  <h5 class="card-title mb-0 fw-bold">
-                    天潮
-                  </h5>
-                  <div class="d-flex justify-content-between gap-4 text-neutral-40 fs-8 fs-md-7">
-                    <span class="fw-bold">SUN-MON</span>
-                    <span class="fw-bold">14:00 - 19:30</span>
-                  </div>
-                </div>
-                <p class="card-text fs-8 fs-md-7">
-                  我們提供各種精緻甜點與糕點，無論您喜歡的是巧克力蛋糕、法式馬卡龍，還是台灣傳統的糕點，都能在這裡找到。讓我們的甜點帶您進入一場繽紛的甜蜜旅程。
+                  {{ culinary.description }}
                 </p>
               </div>
             </div>
@@ -476,15 +262,8 @@ function slideNext() {
               台灣高雄市新興區六角路123號
             </p>
             <picture>
-              <source
-                srcset="/images/home-map.png"
-                media="(min-width: 576px)"
-              >
-              <img
-                class="w-100"
-                src="/images/home-map-sm.png"
-                alt="描述地圖中酒店所在的位置"
-              >
+              <source srcset="/images/home-map.png" media="(min-width: 576px)">
+              <img class="w-100" src="/images/home-map-sm.png" alt="描述地圖中酒店所在的位置">
             </picture>
           </div>
           <div class="col-12 col-md-4 text-neutral-0">
@@ -500,10 +279,7 @@ function slideNext() {
             </p>
           </div>
           <div class="col-12 col-md-4 text-neutral-0">
-            <Icon
-              class="mb-2 mb-md-4 display-1 text-primary-100"
-              icon="ic:baseline-train"
-            />
+            <Icon class="mb-2 mb-md-4 display-1 text-primary-100" icon="ic:baseline-train" />
             <h5 class="fs-7 fs-md-5 fw-bold">
               高鐵/火車
             </h5>
@@ -512,10 +288,7 @@ function slideNext() {
             </p>
           </div>
           <div class="col-12 col-md-4 text-neutral-0">
-            <Icon
-              class="mb-2 mb-md-4 display-1 text-primary-100"
-              icon="mdi:car-side"
-            />
+            <Icon class="mb-2 mb-md-4 display-1 text-primary-100" icon="mdi:car-side" />
             <h5 class="fs-7 fs-md-5 fw-bold">
               禮賓車服務
             </h5>
@@ -526,15 +299,8 @@ function slideNext() {
         </div>
       </div>
       <picture>
-        <source
-          srcset="/images/deco-line-group-horizontal-full.svg"
-          media="(min-width:576px)"
-        >
-        <img
-          class="w-100"
-          src="/images/deco-line-group-horizontal-sm.svg"
-          alt="deco-line-group"
-        >
+        <source srcset="/images/deco-line-group-horizontal-full.svg" media="(min-width:576px)">
+        <img class="w-100" src="/images/deco-line-group-horizontal-sm.svg" alt="deco-line-group">
       </picture>
     </section>
   </main>
@@ -633,6 +399,7 @@ section .btn {
 .hero__intro-content h1 {
   font-size: clamp(3rem, 5.2vw, 6.25rem);
 }
+
 .hero__intro-content p {
   margin-bottom: min(5vh, 3.75rem);
   font-size: clamp(1rem, 1.7vw, 2rem);
