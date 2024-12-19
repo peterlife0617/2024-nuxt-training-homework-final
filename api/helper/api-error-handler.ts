@@ -7,5 +7,5 @@ export function apiErrorHandler(error: unknown) {
     return
   }
 
-  return error
+  return Promise.reject(error)
 }
