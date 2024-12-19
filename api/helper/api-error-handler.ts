@@ -1,4 +1,4 @@
-import { SchemaError } from '~/helper/error'
+import { SchemaError } from '~/utils/error'
 
 export function apiErrorHandler(error: unknown) {
   if (error instanceof SchemaError) {

@@ -1,6 +1,6 @@
 import type { FetchOptions } from 'ofetch'
 import type { ValidateOptions } from '../types/validate-options'
-import { SchemaError } from '~/helper/error'
+import { SchemaError } from '~/utils/error'
 
 interface CreateOptionsParams extends ValidateOptions {
   apiUrl: string
@@ -21,10 +21,8 @@ export function createOptions(params?: CreateOptionsParams) {
         if (result.success) {
           return response._data
         }
-        else {
-          const url = typeof request === 'string' ? request : request.url
-          throw new SchemaError(`Error validating response from ${url}`, result.error.errors)
-        }
+        const url = typeof request === 'string' ? request : request.url
+        throw new SchemaError(`Error validating response from ${url}`, result.error.errors)
       }
       return response._data
     },
