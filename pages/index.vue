@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { Autoplay, Navigation, Pagination } from 'swiper/modules'
-
 import { useHomeCulinaryApi } from '~/api/services/home-culinary'
 import { useHomeNewsApi } from '~/api/services/home-news'
 import { useRoomApi } from '~/api/services/room'
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
 
 definePageMeta({
   name: 'home',
