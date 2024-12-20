@@ -24,5 +24,5 @@ export const homeCulinarySchema = z.object({
 export const homeCulinaryResponseSchema = apiResponseSchema(homeCulinarySchema)
 export const homeCulinaryListResponseSchema = apiResponseSchema(homeCulinaryListSchema)
 
-export type HomeCulinaryResponseSchema = z.infer<typeof homeCulinaryResponseSchema>
-export type HomeCulinaryListResponseSchema = z.infer<typeof homeCulinaryListResponseSchema>
+export type HomeCulinaryResponse = z.infer<typeof homeCulinaryResponseSchema>
+export type HomeCulinaryListResponse = z.infer<typeof homeCulinaryListResponseSchema>

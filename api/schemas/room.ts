@@ -58,5 +58,5 @@ export const roomSchema = z.object({
 export const roomResponseSchema = apiResponseSchema(roomSchema)
 export const roomListResponseSchema = apiResponseSchema(roomListSchema)
 
-export type RoomResponseSchema = z.infer<typeof roomResponseSchema>
-export type RoomListResponseSchema = z.infer<typeof roomListResponseSchema>
+export type RoomResponse = z.infer<typeof roomResponseSchema>
+export type RoomListResponse = z.infer<typeof roomListResponseSchema>

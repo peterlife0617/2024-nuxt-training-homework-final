@@ -22,5 +22,5 @@ export const homeNewsSchema = z.object({
 export const homeNewsResponseSchema = apiResponseSchema(homeNewsSchema)
 export const homeNewsListResponseSchema = apiResponseSchema(homeNewsListSchema)
 
-export type HomeNewsResponseSchema = z.infer<typeof homeNewsResponseSchema>
-export type HomeNewsListResponseSchema = z.infer<typeof homeNewsListResponseSchema>
+export type HomeNewsResponse = z.infer<typeof homeNewsResponseSchema>
+export type HomeNewsListResponse = z.infer<typeof homeNewsListResponseSchema>
