@@ -1,38 +1,48 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { chunk, isNil } from 'lodash-es'
+import { useRoomApi } from '~/api/services/room'
 
 definePageMeta({
   name: 'room-detail',
 })
 
-const datePickerModal = useTemplateRef('datePickerModal')
-function openModal() {
-  datePickerModal.value?.openModal()
-}
+const route = useRoute()
+const router = useRouter()
 
-const MAX_BOOKING_PEOPLE = 10
-const bookingPeople = ref(1)
+const { getRoom } = useRoomApi()
 
-const daysCount = ref(0)
-
-const daysFormatOnMobile = (date?: string) => date?.split('-').slice(1, 3).join(' / ')
-
-function formatDate(date: Date) {
-  const offsetToUTC8 = date.getHours() + 8
-  date.setHours(offsetToUTC8)
-  return date.toISOString().split('T')[0]
-}
+const { data } = await useAsyncData(async () => {
+  return await getRoom(route.params.roomId as string)
+}, {
+  transform: (data) => {
+    return data?.result
+  },
+})
 
 const currentDate = new Date()
 
+const datePickerModalRef = useTemplateRef('datePickerModal')
+const { open } = useModal(datePickerModalRef)
+
+const bookingPeople = ref(1)
+
 const bookingDate = reactive({
   date: {
-    start: formatDate(currentDate),
-    end: null,
+    start: formatDate(currentDate, 'YYYY-MM-DD'),
+    end: '',
   },
-  minDate: new Date(),
-  maxDate: new Date(currentDate.setFullYear(currentDate.getFullYear() + 1)),
+  minDate: currentDate,
+  maxDate: addYears(currentDate, 1),
 })
+
+const daysCount = computed(() => {
+  return diffDays(bookingDate.date.start, bookingDate.date.end)
+})
+
+function isEmptyDate(date?: string | Date | null) {
+  return isNil(date) || date === ''
+}
 
 function handleDateChange(bookingInfo: any) {
   const { start, end } = bookingInfo.date
@@ -40,72 +50,41 @@ function handleDateChange(bookingInfo: any) {
   bookingDate.date.end = end
 
   bookingPeople.value = bookingInfo?.people || 1
-  daysCount.value = bookingInfo.daysCount
+}
+
+function goBack() {
+  router.push({ name: 'rooms' })
 }
 </script>
 
 <template>
   <main class="mt-18 mt-md-30 bg-neutral-100">
     <section class="p-md-20 bg-primary-10">
-      <div
-        class="d-none d-md-block position-relative"
-      >
+      <div class="d-none d-md-block position-relative">
         <div class="d-flex gap-2 rounded-3xl overflow-hidden">
           <div style="width: 52.5vw;">
-            <img
-              class="w-100"
-              src="/images/room-a-1.png"
-              alt="room-a-1"
-            >
+            <img class="w-100" :src="data?.imageUrl" alt="room image">
           </div>
-          <div
-            class="d-flex flex-wrap gap-md-2"
-            style="width: 42.5vw;"
-          >
-            <div class="d-flex gap-md-2">
-              <img
-                class="w-50"
-                src="/images/room-a-2.png"
-                alt="room-a-2"
-              >
-              <img
-                class="w-50"
-                src="/images/room-a-3.png"
-                alt="room-a-3"
-              >
-            </div>
-            <div class="d-flex gap-md-2">
-              <img
-                class="w-50"
-                src="/images/room-a-4.png"
-                alt="room-a-4"
-              >
-              <img
-                class="w-50"
-                src="/images/room-a-5.png"
-                alt="room-a-5"
-              >
+          <div class="d-flex flex-wrap gap-md-2" style="width: 42.5vw;">
+            <div v-for="(images, index) in chunk(data?.imageUrlList, 2)" :key="index" class="d-flex gap-md-2">
+              <img v-for="(image) in images" :key="image" class="w-50" :src="image">
             </div>
           </div>
         </div>
         <button
           class="position-absolute btn btn-primary-10 px-8 py-4 me-3 text-primary-100 border-primary-100 fw-bold rounded-3"
-          style=" right: 40px;bottom: 40px;"
-          type="button"
+          style="right: 40px;bottom: 40px;" type="button"
+          @click="goBack"
         >
           看更多
         </button>
       </div>
       <div class="d-md-none position-relative">
-        <img
-          class="img-fluid"
-          src="/images/room-a-1.png"
-          alt="room-a-1"
-        >
+        <img class="img-fluid" :src="data?.imageUrl" alt="room-a-1">
         <button
           class="position-absolute btn btn-primary-10 px-8 py-4 text-primary-100 border-primary-100 fw-bold rounded-3"
-          style=" right: 12px;bottom: 23px;"
-          type="button"
+          style=" right: 12px;bottom: 23px;" type="button"
+          @click="goBack"
         >
           看更多
         </button>
@@ -118,10 +97,10 @@ function handleDateChange(bookingInfo: any) {
           <div class="col-12 col-md-7 d-flex flex-column gap-6 gap-md-20">
             <div>
               <h1 class="mb-4 text-neutral-100 fw-bold">
-                尊爵雙人房
+                {{ data?.name }}
               </h1>
               <p class="mb-0 text-neutral-80 fs-8 fs-md-7 fw-medium">
-                享受高級的住宿體驗，尊爵雙人房提供給您舒適寬敞的空間和精緻的裝潢。
+                {{ data?.description }}
               </p>
             </div>
 
@@ -131,30 +110,21 @@ function handleDateChange(bookingInfo: any) {
               </h3>
               <ul class="d-flex gap-4 list-unstyled">
                 <li class="card-info px-4 py-5 bg-neutral-0 border border-primary-40 rounded-3">
-                  <Icon
-                    class="mb-2 fs-5 text-primary-100"
-                    icon="fluent:slide-size-24-filled"
-                  />
+                  <Icon class="mb-2 fs-5 text-primary-100" icon="fluent:slide-size-24-filled" />
                   <p class="mb-0 fw-bold text-neutral-80 text-nowrap">
-                    24 坪
+                    {{ data?.areaInfo }}
                   </p>
                 </li>
                 <li class="card-info px-4 py-5 bg-neutral-0 border border-primary-40 rounded-3">
-                  <Icon
-                    class="mb-2 fs-5 text-primary-100"
-                    icon="material-symbols:king-bed"
-                  />
+                  <Icon class="mb-2 fs-5 text-primary-100" icon="material-symbols:king-bed" />
                   <p class="mb-0 fw-bold text-neutral-80 text-nowrap">
-                    1 張大床
+                    {{ data?.bedInfo }}
                   </p>
                 </li>
                 <li class="card-info px-4 py-5 bg-neutral-0 border border-primary-40 rounded-3">
-                  <Icon
-                    class="mb-2 fs-5 text-primary-100"
-                    icon="ic:baseline-person"
-                  />
+                  <Icon class="mb-2 fs-5 text-primary-100" icon="ic:baseline-person" />
                   <p class="mb-0 fw-bold text-neutral-80 text-nowrap">
-                    2-4 人
+                    {{ data?.maxPeople }} 人
                   </p>
                 </li>
               </ul>
@@ -164,50 +134,13 @@ function handleDateChange(bookingInfo: any) {
               <h3 class="title-deco mb-4 mb-md-6 text-neutral-100 fs-7 fs-md-5 fw-bold">
                 房間格局
               </h3>
-              <ul class="d-flex flex-wrap gap-6 gap-md-10 p-6 bg-neutral-0 fs-8 fs-md-7 rounded-3 list-unstyled">
-                <li class="d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
+              <ul
+                class="d-flex flex-wrap gap-6 gap-md-10 p-6 bg-neutral-0 fs-8 fs-md-7 rounded-3 list-unstyled"
+              >
+                <li v-for="info in data?.layoutInfo" :key="info.title" class="d-flex gap-2">
+                  <Icon class="fs-5 text-primary-100" icon="material-symbols:check" />
                   <p class="mb-0 text-neutral-80 fw-bold">
-                    市景
-                  </p>
-                </li>
-                <li class="d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    獨立衛浴
-                  </p>
-                </li>
-                <li class="d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    客廳
-                  </p>
-                </li>
-                <li class="d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    書房
-                  </p>
-                </li>
-                <li class="d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    樓層電梯
+                    {{ info.title }}
                   </p>
                 </li>
               </ul>
@@ -217,95 +150,13 @@ function handleDateChange(bookingInfo: any) {
               <h3 class="title-deco mb-4 mb-md-6 text-neutral-100 fs-7 fs-md-5 fw-bold">
                 房內設備
               </h3>
-              <ul class="d-flex flex-wrap row-gap-2 column-gap-10 p-6 mb-0 bg-neutral-0 fs-8 fs-md-7 rounded-3 list-unstyled">
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
+              <ul
+                class="d-flex flex-wrap row-gap-2 column-gap-10 p-6 mb-0 bg-neutral-0 fs-8 fs-md-7 rounded-3 list-unstyled"
+              >
+                <li v-for="info in data?.facilityInfo" :key="info.title" class="flex-item d-flex gap-2">
+                  <Icon class="fs-5 text-primary-100" icon="material-symbols:check" />
                   <p class="mb-0 text-neutral-80 fw-bold">
-                    平面電視
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    吹風機
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    冰箱
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    熱水壺
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    檯燈
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    衣櫃
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    除濕機
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    浴缸
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    書桌
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    音響
+                    {{ info.title }}
                   </p>
                 </li>
               </ul>
@@ -315,95 +166,13 @@ function handleDateChange(bookingInfo: any) {
               <h3 class="title-deco mb-4 mb-md-6 text-neutral-100 fs-7 fs-md-5 fw-bold">
                 備品提供
               </h3>
-              <ul class="d-flex flex-wrap row-gap-2 column-gap-10 p-6 mb-0 bg-neutral-0 fs-8 fs-md-7 rounded-3 list-unstyled">
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
+              <ul
+                class="d-flex flex-wrap row-gap-2 column-gap-10 p-6 mb-0 bg-neutral-0 fs-8 fs-md-7 rounded-3 list-unstyled"
+              >
+                <li v-for="info in data?.amenityInfo" :key="info.title" class="flex-item d-flex gap-2">
+                  <Icon class="fs-5 text-primary-100" icon="material-symbols:check" />
                   <p class="mb-0 text-neutral-80 fw-bold">
-                    衛生紙
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    拖鞋
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    沐浴用品
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    清潔用品
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    刮鬍刀
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    吊衣架
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    浴巾
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    刷牙用品
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    罐裝水
-                  </p>
-                </li>
-                <li class="flex-item d-flex gap-2">
-                  <Icon
-                    class="fs-5 text-primary-100"
-                    icon="material-symbols:check"
-                  />
-                  <p class="mb-0 text-neutral-80 fw-bold">
-                    梳子
+                    {{ info.title }}
                   </p>
                 </li>
               </ul>
@@ -438,10 +207,10 @@ function handleDateChange(bookingInfo: any) {
 
               <div class="text-neutral-80">
                 <h2 class="fw-bold">
-                  尊爵雙人房
+                  {{ data?.name }}
                 </h2>
                 <p class="mb-0 fw-medium">
-                  享受高級的住宿體驗，尊爵雙人房提供給您舒適寬敞的空間和精緻的裝潢。
+                  {{ data?.description }}
                 </p>
               </div>
 
@@ -449,18 +218,12 @@ function handleDateChange(bookingInfo: any) {
                 <div class="d-flex flex-wrap gap-2 mb-4">
                   <div class="form-floating flex-grow-1 flex-shrink-1">
                     <input
-                      id="checkinInput"
-                      readonly
-                      type="date"
-                      :value="bookingDate.date.start"
+                      id="checkinInput" readonly type="date" :value="bookingDate.date.start"
                       class="form-control p-4 pt-9 text-neutral-100 fw-medium border-neutral-100 rounded-3"
-                      style="min-height: 74px;"
-                      placeholder="yyyy-mm-dd"
-                      @click="openModal"
+                      style="min-height: 74px;" placeholder="yyyy-mm-dd" @click="open"
                     >
                     <label
-                      class="text-neutral-80 fw-medium"
-                      style="top: 8px;left: 8px;"
+                      class="text-neutral-80 fw-medium" style="top: 8px;left: 8px;"
                       for="checkinInput"
                     >入住
                     </label>
@@ -468,18 +231,12 @@ function handleDateChange(bookingInfo: any) {
 
                   <div class="form-floating flex-grow-1 flex-shrink-1">
                     <input
-                      id="checkoutInput"
-                      readonly
-                      type="date"
-                      :value="bookingDate.date.end"
+                      id="checkoutInput" readonly type="date" :value="bookingDate.date.end"
                       class="form-control p-4 pt-9 text-neutral-100 fw-medium border-neutral-100 rounded-3"
-                      style="min-height: 74px;"
-                      placeholder="yyyy-mm-dd"
-                      @click="openModal"
+                      style="min-height: 74px;" placeholder="yyyy-mm-dd" @click="open"
                     >
                     <label
-                      class="text-neutral-80 fw-medium"
-                      style="top: 8px;left: 8px;"
+                      class="text-neutral-80 fw-medium" style="top: 8px;left: 8px;"
                       for="checkoutInput"
                     >退房
                     </label>
@@ -494,20 +251,15 @@ function handleDateChange(bookingInfo: any) {
                     <button
                       :class="{ 'disabled bg-neutral-40': bookingPeople === 1 }"
                       class="btn btn-neutral-0 p-4 border border-neutral-40 rounded-circle"
-                      type="button"
-                      @click="bookingPeople--"
+                      type="button" @click="bookingPeople--"
                     >
-                      <Icon
-                        class="fs-5 text-neutral-100"
-                        icon="ic:baseline-minus"
-                      />
+                      <Icon class="fs-5 text-neutral-100" icon="ic:baseline-minus" />
                     </button>
 
                     <h6
                       id="people"
                       class="d-flex justify-content-center align-items-center fw-bold text-neutral-100"
-                      style="width: 24px;"
-                      name="people"
+                      style="width: 24px;" name="people"
                     >
                       {{ bookingPeople }}
                     </h6>
@@ -516,42 +268,47 @@ function handleDateChange(bookingInfo: any) {
                       :class="{
                         'disabled bg-neutral-40':
                           bookingPeople
-                          === MAX_BOOKING_PEOPLE,
-                      }"
-                      class="btn btn-neutral-0 p-4 border border-neutral-40 rounded-circle"
-                      type="button"
-                      @click="bookingPeople++"
+                          === data?.maxPeople,
+                      }" class="btn btn-neutral-0 p-4 border border-neutral-40 rounded-circle"
+                      type="button" @click="bookingPeople++"
                     >
-                      <Icon
-                        class="fs-5 text-neutral-100"
-                        icon="ic:baseline-plus"
-                      />
+                      <Icon class="fs-5 text-neutral-100" icon="ic:baseline-plus" />
                     </button>
                   </div>
                 </div>
               </div>
 
               <h5 class="mb-0 text-primary-100 fw-bold">
-                NT$ 10,000
+                {{ formatCurrency(data?.price ?? 0) }}
               </h5>
               <NuxtLink
+                v-if="bookingDate.date.end"
                 :to="{ name: 'booking', params: { roomId: $route.params.roomId } }"
                 class="btn btn-primary-100 py-4 text-neutral-0 fw-bold rounded-3"
               >
                 立即預訂
               </NuxtLink>
+              <button
+                v-else
+                :to="{ name: 'booking', params: { roomId: $route.params.roomId } }"
+                class="btn btn-primary-100 py-4 text-neutral-0 fw-bold rounded-3 disabled"
+                disable
+              >
+                立即預訂
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="d-flex d-md-none justify-content-between align-items-center position-fixed bottom-0 w-100 p-3 bg-neutral-0">
-        <template v-if="bookingDate.date.end === null">
-          <small class="text-neutral-80 fw-medium">ＮＴ$ 10,000 / 晚</small>
+      <div
+        class="d-flex d-md-none justify-content-between align-items-center position-fixed bottom-0 w-100 p-3 bg-neutral-0"
+      >
+        <template v-if="isEmptyDate(bookingDate.date.end)">
+          <small class="text-neutral-80 fw-medium">{{ formatCurrency(data?.price) }} / 晚</small>
           <button
             class="btn btn-primary-100 px-12 py-4 text-neutral-0 fw-bold rounded-3"
-            type="button"
-            @click="openModal"
+            type="button" @click="open"
           >
             查看可訂日期
           </button>
@@ -559,8 +316,11 @@ function handleDateChange(bookingInfo: any) {
 
         <template v-else>
           <div class="d-flex flex-column gap-1">
-            <small class="text-neutral-80 fw-medium">ＮＴ$ 10,000 / {{ daysCount }} 晚 / {{ bookingPeople }} 人</small>
-            <span class="text-neutral fs-9 fw-medium text-decoration-underline">{{ daysFormatOnMobile(bookingDate.date?.start) }} - {{ daysFormatOnMobile(bookingDate.date?.end) }}</span>
+            <small class="text-neutral-80 fw-medium">{{ formatCurrency(data?.price) }} / {{ daysCount }} 晚 / {{
+              bookingPeople }} 人</small>
+            <span class="text-neutral fs-9 fw-medium text-decoration-underline">{{
+              formatDate(bookingDate.date?.start, 'MM / DD') }} - {{
+              formatDate(bookingDate.date?.end, 'MM / DD') }}</span>
           </div>
           <NuxtLink
             :to="{ name: 'booking', params: { roomId: $route.params.roomId } }"
@@ -573,9 +333,9 @@ function handleDateChange(bookingInfo: any) {
     </section>
 
     <ClientOnly>
-      <RoomsDatePickerModal
-        ref="datePickerModal"
-        :date-time="bookingDate"
+      <DatePickerModal
+        ref="datePickerModal" :date-time="bookingDate"
+        :room-data="data"
         @handle-date-change="handleDateChange"
       />
     </ClientOnly>
@@ -620,7 +380,7 @@ $grid-breakpoints: (
 }
 
 .flex-item {
-  flex: 1 1 15%;
+  flex: 0 1 15%;
 
   @include media-breakpoint-down(md) {
     flex-basis: 40%;

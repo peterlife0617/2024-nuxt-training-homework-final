@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import type { RoomResponse } from '~/api/schemas/room'
 import { Icon } from '@iconify/vue'
+import { isNil } from 'lodash-es'
 import { DatePicker } from 'v-calendar'
 import { useScreens } from 'vue-screen-utils'
 import ModalFooter from './components/ModalFooter.vue'
@@ -8,7 +10,17 @@ import ModalHeader from './components/ModalHeader.vue'
 import ModalHeaderMobile from './components/ModalHeaderMobile.vue'
 import 'v-calendar/style.css'
 
-const emit = defineEmits(['handleDateChange'])
+const emit = defineEmits<{
+  (event: 'handleDateChange', data: {
+    date: {
+      start: string | Date
+      end: string | Date
+    }
+
+    daysCount: number
+    people?: number
+  }): void
+}>()
 
 const props = defineProps<{
   dateTime: {
@@ -19,9 +31,8 @@ const props = defineProps<{
     minDate: string | Date
     maxDate: string | Date
   }
+  roomData?: RoomResponse['result'] | null
 }>()
-
-const MAX_BOOKING_PEOPLE = 10
 
 const masks = {
   title: 'YYYY 年 MM 月',
@@ -71,14 +82,14 @@ function confirmDate() {
   if (isMobile.value) {
     emit('handleDateChange', {
       date: tempDate.date,
-      people: bookingPeopleMobile,
-      daysCount,
+      people: bookingPeopleMobile.value,
+      daysCount: daysCount.value,
     })
   }
   else {
     emit('handleDateChange', {
       date: tempDate.date,
-      daysCount,
+      daysCount: daysCount.value,
     })
   }
 
@@ -89,6 +100,10 @@ function clearDate() {
   tempDate.date.start = ''
   tempDate.date.end = ''
   tempDate.key++
+}
+
+function isEmptyDate(date?: string | Date | null) {
+  return isNil(date) || date === ''
 }
 
 defineExpose({
@@ -167,13 +182,14 @@ defineExpose({
           選擇人數
         </h6>
         <p class="mb-4 text-neutral-80 fs-8 fw-medium">
-          此房型最多供 4 人居住，不接受寵物入住。
+          此房型最多供 {{ props.roomData?.maxPeople }} 人居住，不接受寵物入住。
         </p>
 
         <div class="d-flex align-items-center gap-4">
           <button
             :class="{ 'disabled bg-neutral-40': bookingPeopleMobile === 1 }"
             class="btn btn-neutral-0 p-4 border border-neutral-40 rounded-circle" type="button"
+            :disabled="bookingPeopleMobile === 1"
             @click="bookingPeopleMobile--"
           >
             <Icon class="fs-5 text-neutral-100" icon="ic:baseline-minus" />
@@ -191,9 +207,10 @@ defineExpose({
             :class="{
               'disabled bg-neutral-40':
                 bookingPeopleMobile
-                === MAX_BOOKING_PEOPLE,
+                === props.roomData?.maxPeople,
             }" class="btn btn-neutral-0 p-4 border border-neutral-40 rounded-circle"
-            type="button" @click="bookingPeopleMobile++"
+            type="button" :disabled="bookingPeopleMobile === props.roomData?.maxPeople"
+            @click="bookingPeopleMobile++"
           >
             <Icon class="fs-5 text-neutral-100" icon="ic:baseline-plus" />
           </button>
@@ -244,6 +261,7 @@ defineExpose({
         <button
           type="button"
           class="btn btn-primary-100 flex-grow-1 flex-md-grow-0 px-8 py-4 text-neutral-0 fw-bold rounded-3"
+          :disabled="isEmptyDate(tempDate.date.start) || isEmptyDate(tempDate.date.end)"
           @click="confirmDateOnMobile"
         >
           確定日期
