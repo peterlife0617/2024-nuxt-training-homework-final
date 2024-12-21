@@ -9,6 +9,6 @@ export function useUserCheckApi() {
   const api = useApiFactory(apiInstance)
 
   return {
-    userCheck: (data: any, options?: FetchOptions) => api.post(BASE_PATH, data, options, { responseSchema: userCheckResponseSchema }),
+    userCheck: (options?: FetchOptions) => api.get(BASE_PATH, options, { responseSchema: userCheckResponseSchema }),
   }
 }

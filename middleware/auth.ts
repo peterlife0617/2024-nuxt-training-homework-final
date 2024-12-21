@@ -1,3 +1,4 @@
+import { useUserCheckApi } from '~/api/services/user-check'
 import { CookieEnum } from '~/enums/cookie'
 
 export default defineNuxtRouteMiddleware(async () => {
@@ -14,25 +15,16 @@ export default defineNuxtRouteMiddleware(async () => {
 
   const token = useCookie(CookieEnum.Auth)
   if (!token.value) {
-    return navigateTo('/login')
+    return navigateTo('/account/login')
   }
 
-  const response = await $fetch<{ status: true, token: string } | { status: false, message: string }>(
-    '/user/check',
-    {
-      baseURL: 'https://nuxr3.zeabur.app/api/v1',
-      method: 'GET',
-      headers: {
-        Authorization: token.value,
-      },
-    },
-  ).catch(() => {
-    return null
-  })
+  const { userCheck } = useUserCheckApi()
 
-  if (response?.status) {
-    return
+  const response = await userCheck()
+
+  if (!response?.status) {
+    return navigateTo('/account/login')
   }
 
-  return navigateTo('/login')
+  return true
 })
