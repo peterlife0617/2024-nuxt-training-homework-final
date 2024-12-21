@@ -1,7 +1,38 @@
 <script setup lang="ts">
+import { useUserLoginApi } from '~/api/services/user-login'
+
 definePageMeta({
   name: 'login',
 })
+
+const initialValues = {
+  email: '',
+  password: '',
+}
+if (import.meta.dev) {
+  initialValues.email = 'exampleaa@example.com'
+  initialValues.password = 'a12345678'
+}
+
+const { login } = useUserLoginApi()
+const { error, success } = useAlert()
+const router = useRouter()
+
+async function onSubmit(values: Partial<typeof initialValues>) {
+  const response = await login(values)
+  if (!response?.status) {
+    error(response?.message ?? '登入失敗')
+    return
+  }
+
+  const token = useCookie('auth', {
+    maxAge: 60 * 60 * 24,
+    path: '/',
+  })
+  token.value = response.token
+  await success('登入成功')
+  router.push('/')
+}
 </script>
 
 <template>
@@ -15,49 +46,29 @@ definePageMeta({
       </h1>
     </div>
 
-    <form class="mb-10">
+    <VForm class="mb-10" :initial-values="initialValues" @submit="onSubmit">
       <div class="mb-4 fs-8 fs-md-7">
-        <label
-          class="mb-2 text-neutral-0 fw-bold"
-          for="email"
-        >
+        <label class="mb-2 text-neutral-0 fw-bold" for="email">
           電子信箱
         </label>
-        <input
-          id="email"
-          class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
-          value="jessica@sample.com"
-          placeholder="請輸入信箱"
-          type="email"
-        >
+        <VField
+          id="email" class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
+          placeholder="請輸入信箱" type="email" name="email"
+        />
       </div>
       <div class="mb-4 fs-8 fs-md-7">
-        <label
-          class="mb-2 text-neutral-0 fw-bold"
-          for="password"
-        >
+        <label class="mb-2 text-neutral-0 fw-bold" for="password">
           密碼
         </label>
-        <input
-          id="password"
+        <VField
           class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
-          value="jessica@sample.com"
-          placeholder="請輸入密碼"
-          type="password"
-        >
+          placeholder="請輸入密碼" type="password" name="password"
+        />
       </div>
       <div class="d-flex justify-content-between align-items-center mb-10 fs-8 fs-md-7">
         <div class="form-check d-flex align-items-end gap-2 text-neutral-0">
-          <input
-            id="remember"
-            class="form-check-input"
-            type="checkbox"
-            value=""
-          >
-          <label
-            class="form-check-label fw-bold"
-            for="remember"
-          >
+          <input id="remember" class="form-check-input" type="checkbox" value="">
+          <label class="form-check-label fw-bold" for="remember">
             記住帳號
           </label>
         </div>
@@ -68,13 +79,10 @@ definePageMeta({
           忘記密碼？
         </button>
       </div>
-      <button
-        class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold"
-        type="button"
-      >
+      <button class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold" type="submit">
         會員登入
       </button>
-    </form>
+    </VForm>
 
     <p class="mb-0 fs-8 fs-md-7">
       <span class="me-2 text-neutral-0 fw-medium">沒有會員嗎？</span>

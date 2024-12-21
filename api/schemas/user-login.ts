@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { apiResponseSchema } from '../helper/api-response-schema'
 
 export const userLoginSchema = z.object({
   address: z.object({
@@ -18,8 +17,8 @@ export const userLoginSchema = z.object({
   id: z.string(),
 })
 
-export const userLoginResponseSchema = apiResponseSchema(userLoginSchema).merge(z.object({
-  token: z.string(),
-}))
-
+export const userLoginResponseSchema = z.discriminatedUnion('status', [
+  z.object({ status: z.literal(true), token: z.string(), result: userLoginSchema }),
+  z.object({ status: z.literal(false), message: z.string() }),
+])
 export type UserLoginResponse = z.infer<typeof userLoginResponseSchema>
