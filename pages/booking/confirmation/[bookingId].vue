@@ -43,12 +43,12 @@ const { data } = await useAsyncData(() => getOrderDetail(route.params.bookingId 
             <h2 class="mb-6 mb-md-10 text-neutral-0 fs-7 fs-md-5 fw-bold">
               立即查看您的訂單紀錄
             </h2>
-            <button
+            <NuxtLink
               class="btn btn-primary-100 px-md-15 py-4 text-neutral-0 fw-bold border-0 rounded-3"
-              type="button"
+              to="/user/order"
             >
               前往我的訂單
-            </button>
+            </NuxtLink>
           </div>
 
           <hr class="my-10 my-md-20 opacity-100  text-neutral-40">
