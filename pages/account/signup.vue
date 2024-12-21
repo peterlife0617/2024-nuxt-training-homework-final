@@ -53,6 +53,7 @@ const { signup } = useUserSignupApi()
 const step1FormRef = useTemplateRef('step1Form')
 const { error, success } = useAlert()
 const router = useRouter()
+const { setUser } = useUserStore()
 
 const isEmailAndPasswordValid = ref(false)
 const isAgree = ref(false)
@@ -93,15 +94,9 @@ async function onStep2FormSubmit(values: any) {
     maxAge: 60 * 60 * 24,
     path: '/',
   })
-  const user = useCookie<{ name: string, email: string } | null>(CookieEnum.User, {
-    maxAge: 60 * 60 * 24,
-    path: '/',
-  })
+
   token.value = response.token
-  user.value = {
-    name: response.result.name,
-    email: response.result.email,
-  }
+  setUser(response.result)
   await success('登入成功')
   router.push('/')
 }

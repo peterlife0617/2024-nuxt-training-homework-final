@@ -18,6 +18,7 @@ if (import.meta.dev) {
 const { login } = useUserLoginApi()
 const { error, success } = useAlert()
 const router = useRouter()
+const { setUser } = useUserStore()
 
 async function onSubmit(values: Partial<typeof initialValues>) {
   const response = await login(values)
@@ -31,17 +32,8 @@ async function onSubmit(values: Partial<typeof initialValues>) {
     path: '/',
   })
 
-  const user = useCookie<{ name: string, email: string } | null>(CookieEnum.User, {
-    maxAge: 60 * 60 * 24,
-    path: '/',
-  })
-
   token.value = response.token
-
-  user.value = {
-    name: response.result.name,
-    email: response.result.email,
-  }
+  setUser(response.result)
 
   await success('登入成功')
   router.push('/')

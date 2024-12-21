@@ -2,16 +2,17 @@
 import { Icon } from '@iconify/vue'
 import { CookieEnum } from '~/enums/cookie'
 
+const transparentBgRoute = ['home', 'rooms']
+
 const route = useRoute()
 const router = useRouter()
 const token = useCookie(CookieEnum.Auth)
-const user = useCookie<{ name: string, email: string } | null >(CookieEnum.User)
-
-const transparentBgRoute = ['home', 'rooms']
-
-const isTransparentRoute = computed(() => transparentBgRoute.includes(route.name as string))
+const { user } = storeToRefs(useUserStore())
+const { setUser } = useUserStore()
 
 const isScrolled = ref(false)
+
+const isTransparentRoute = computed(() => transparentBgRoute.includes(route.name as string))
 
 function handleScroll() {
   isScrolled.value = window.scrollY > 50
@@ -27,7 +28,7 @@ onUnmounted(() => {
 
 function logout() {
   token.value = null
-  user.value = null
+  setUser(null)
   router.push('/account/login')
 }
 </script>
