@@ -21,6 +21,7 @@ export function useApiFactory(fetch: typeof $fetch) {
 
     post: <TResponse>(
       url: string,
+      data: any,
       options?: FetchOptions,
       validateOptions?: ValidateOptions<TResponse>,
     ) =>
@@ -28,6 +29,20 @@ export function useApiFactory(fetch: typeof $fetch) {
         ...options,
         ...createOptions({ ...validateOptions, apiUrl, token: token.value }),
         method: 'POST',
+        body: data,
+      }).catch(apiErrorHandler),
+
+    put: <TResponse>(
+      url: string,
+      data: any,
+      options?: FetchOptions,
+      validateOptions?: ValidateOptions<TResponse>,
+    ) =>
+      fetch<TResponse>(url, {
+        ...options,
+        ...createOptions({ ...validateOptions, apiUrl, token: token.value }),
+        method: 'PUT',
+        body: data,
       }).catch(apiErrorHandler),
   }
 }
