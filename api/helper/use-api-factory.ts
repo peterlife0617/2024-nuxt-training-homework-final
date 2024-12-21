@@ -45,5 +45,13 @@ export function useApiFactory(fetch: typeof $fetch) {
         method: 'PUT',
         body: data,
       }).catch(apiErrorHandler),
+
+    delete: <TResponse>(url: string, options?: FetchOptions, validateOptions?: ValidateOptions<TResponse>) => {
+      return fetch<TResponse>(url, {
+        ...options,
+        ...createOptions({ ...validateOptions, apiUrl, token: token.value }),
+        method: 'DELETE',
+      }).catch(apiErrorHandler)
+    },
   }
 }

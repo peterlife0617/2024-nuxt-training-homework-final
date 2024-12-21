@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import { chunk, isNil } from 'lodash-es'
+import { chunk, cloneDeep, isNil } from 'lodash-es'
 import { useRoomApi } from '~/api/services/room'
 
 definePageMeta({
@@ -24,13 +24,14 @@ const currentDate = new Date()
 
 const datePickerModalRef = useTemplateRef('datePickerModal')
 const { open } = useModal(datePickerModalRef)
+const { setOrder, order } = useOrderStore()
 
-const bookingPeople = ref(1)
+const bookingPeople = ref(order?.peopleNum ?? 1)
 
 const bookingDate = reactive({
   date: {
-    start: formatDate(currentDate, 'YYYY-MM-DD'),
-    end: '',
+    start: order?.checkInDate ?? formatDate(currentDate, 'YYYY-MM-DD'),
+    end: order?.checkOutDate ?? '',
   },
   minDate: currentDate,
   maxDate: addYears(currentDate, 1),
@@ -54,6 +55,21 @@ function handleDateChange(bookingInfo: any) {
 
 function goBack() {
   router.push({ name: 'rooms' })
+}
+
+function booking() {
+  if (!data.value) {
+    return
+  }
+
+  setOrder({
+    roomId: route.params.roomId as string,
+    checkInDate: bookingDate.date.start,
+    checkOutDate: bookingDate.date.end,
+    peopleNum: bookingPeople.value,
+    roomInfo: cloneDeep(data.value),
+  })
+  router.push({ name: 'booking', params: { roomId: route.params.roomId } })
 }
 </script>
 
@@ -281,16 +297,15 @@ function goBack() {
               <h5 class="mb-0 text-primary-100 fw-bold">
                 {{ formatCurrency(data?.price ?? 0) }}
               </h5>
-              <NuxtLink
+              <button
                 v-if="bookingDate.date.end"
-                :to="{ name: 'booking', params: { roomId: $route.params.roomId } }"
                 class="btn btn-primary-100 py-4 text-neutral-0 fw-bold rounded-3"
+                @click="booking"
               >
                 立即預訂
-              </NuxtLink>
+              </button>
               <button
                 v-else
-                :to="{ name: 'booking', params: { roomId: $route.params.roomId } }"
                 class="btn btn-primary-100 py-4 text-neutral-0 fw-bold rounded-3 disabled"
                 disable
               >
