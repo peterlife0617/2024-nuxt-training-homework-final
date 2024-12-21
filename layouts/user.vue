@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import type { UserResponse } from '~/api/schemas/user'
-
-const props = defineProps<{
-  user: UserResponse['result']
-}>()
+const { user } = storeToRefs(useUserStore())
 </script>
 
 <template>
@@ -29,7 +25,7 @@ const props = defineProps<{
             alt="avatar"
           >
           <h1 class="text-neutral-0 fw-bold">
-            Hello，{{ props.user.name }}
+            Hello，{{ user?.name }}
           </h1>
         </div>
       </div>

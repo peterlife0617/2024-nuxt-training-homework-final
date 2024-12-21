@@ -1,20 +1,17 @@
 <script setup lang="ts">
-import type { UserResponse } from '~/api/schemas/user'
 import { useUserApi } from '~/api/services/user'
 
 definePageMeta({
   name: 'user-profile',
 })
 
-const props = defineProps<{
-  user: UserResponse['result']
-}>()
-
 const { updateUser } = useUserApi()
-
+const { user } = storeToRefs(useUserStore())
+const { setUser } = useUserStore()
 const passwordFormRef = useTemplateRef('passwordForm')
 const basicDataFormRef = useTemplateRef('basicDataForm')
 const { error, success } = useAlert()
+
 const isEditPassword = ref(false)
 const isEditProfile = ref(false)
 
@@ -48,19 +45,23 @@ async function onBasicDataFormSubmit(values: {
     detail?: string
   }
 }) {
-  const response = await updateUser({
+  const updateValues = {
     ...values,
     address: {
       ...values.address,
       zipcode: 800,
     },
-  })
+  }
+
+  const response = await updateUser(updateValues)
 
   if (!response?.status) {
     error(response?.message || '更新失敗')
     return
   }
+
   success('更新成功')
+  setUser(response.result)
   isEditProfile.value = false
 }
 
@@ -86,10 +87,14 @@ function getBirthdayWithDay(event: Event, birthday?: string) {
 }
 
 onMounted(() => {
+  if (!user.value) {
+    return
+  }
+
   passwordFormRef.value?.resetForm({
     values: {
-      userId: props.user._id,
-      email: props.user.email,
+      userId: user.value._id,
+      email: user.value.email,
     },
   })
 
@@ -101,15 +106,15 @@ onMounted(() => {
 
   basicDataFormRef.value?.resetForm({
     values: {
-      userId: props.user._id,
-      name: props.user.name,
-      phone: props.user.phone,
-      birthday: formatDate(props.user.birthday, 'YYYY/M/D'),
+      userId: user.value._id,
+      name: user.value.name,
+      phone: user.value.phone,
+      birthday: formatDate(user.value.birthday, 'YYYY/M/D'),
       address: {
-        city: props.user.address.city ?? '',
-        county: props.user.address.county ?? '',
-        detail: props.user.address.detail ?? '',
-        zipcode: props.user.address.zipcode ?? null,
+        city: user.value.address.city ?? '',
+        county: user.value.address.county ?? '',
+        detail: user.value.address.detail ?? '',
+        zipcode: user.value.address.zipcode ?? null,
       },
     },
   })

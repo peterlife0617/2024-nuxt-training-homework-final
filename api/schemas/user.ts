@@ -19,9 +19,7 @@ export const userSchema = z.object({
 
 export const userResponseSchema = apiResponseSchema(userSchema)
 export const updateUserResponseSchema = z.discriminatedUnion('status', [
-  z.object({
-    status: z.literal(true),
-  }),
+  apiResponseSchema(userSchema),
   z.object({
     status: z.literal(false),
     message: z.string(),

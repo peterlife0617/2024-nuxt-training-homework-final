@@ -6,18 +6,17 @@ definePageMeta({
 })
 
 const { getUser } = useUserApi()
-const { data } = await useAsyncData(() => {
-  return getUser()
-}, {
-  transform: (data) => {
-    return data?.result
-  },
+const { setUser } = useUserStore()
+await useAsyncData(async () => {
+  const response = await getUser()
+  setUser(response?.result ?? null)
+  return Promise.resolve(true)
 })
 </script>
 
 <template>
-  <NuxtLayout name="user" :user="data">
-    <NuxtPage :user="data" />
+  <NuxtLayout name="user">
+    <NuxtPage />
   </NuxtLayout>
 </template>
 
