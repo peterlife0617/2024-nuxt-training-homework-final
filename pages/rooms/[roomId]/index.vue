@@ -24,14 +24,14 @@ const currentDate = new Date()
 
 const datePickerModalRef = useTemplateRef('datePickerModal')
 const { open } = useModal(datePickerModalRef)
-const { setOrder, order } = useOrderStore()
+const { setBooking, booking } = useBookingStore()
 
-const bookingPeople = ref(order?.peopleNum ?? 1)
+const bookingPeople = ref(booking?.peopleNum ?? 1)
 
 const bookingDate = reactive({
   date: {
-    start: order?.checkInDate ?? formatDate(currentDate, 'YYYY-MM-DD'),
-    end: order?.checkOutDate ?? '',
+    start: booking?.checkInDate ?? formatDate(currentDate, 'YYYY-MM-DD'),
+    end: booking?.checkOutDate ?? '',
   },
   minDate: currentDate,
   maxDate: addYears(currentDate, 1),
@@ -57,12 +57,12 @@ function goBack() {
   router.push({ name: 'rooms' })
 }
 
-function booking() {
+function bookingNow() {
   if (!data.value) {
     return
   }
 
-  setOrder({
+  setBooking({
     roomId: route.params.roomId as string,
     checkInDate: bookingDate.date.start,
     checkOutDate: bookingDate.date.end,
@@ -300,7 +300,7 @@ function booking() {
               <button
                 v-if="bookingDate.date.end"
                 class="btn btn-primary-100 py-4 text-neutral-0 fw-bold rounded-3"
-                @click="booking"
+                @click="bookingNow"
               >
                 立即預訂
               </button>

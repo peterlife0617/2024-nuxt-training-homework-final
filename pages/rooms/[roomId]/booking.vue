@@ -6,8 +6,8 @@ import { useUserApi } from '~/api/services/user'
 definePageMeta({
   name: 'booking',
   middleware: ['auth', (to) => {
-    const { order } = storeToRefs(useOrderStore())
-    if (!order.value) {
+    const { booking } = storeToRefs(useBookingStore())
+    if (!booking.value) {
       return navigateTo({
         name: 'room-detail',
         params: {
@@ -23,8 +23,8 @@ definePageMeta({
 const DISCOUNT = 1000
 
 const router = useRouter()
-const { order } = storeToRefs(useOrderStore())
-const { setOrder } = useOrderStore()
+const { booking } = storeToRefs(useBookingStore())
+const { setBooking } = useBookingStore()
 const { getUser } = useUserApi()
 const { createOrder } = useOrdersApi()
 const formRef = useTemplateRef('form')
@@ -32,7 +32,7 @@ const { pending: createOrderPending, execute: executeCreateOrder } = useApiContr
 const { error } = useAlert()
 
 const daysCount = computed(() => {
-  return diffDays(order.value?.checkInDate, order.value?.checkOutDate)
+  return diffDays(booking.value?.checkInDate, booking.value?.checkOutDate)
 })
 
 function goBack() {
@@ -53,7 +53,7 @@ async function onSubmit(values: {
   }
 }) {
   const response = await executeCreateOrder({
-    ...order.value,
+    ...booking.value,
     userInfo: values.userInfo,
   })
 
@@ -63,7 +63,7 @@ async function onSubmit(values: {
   }
 
   // 清除訂房資訊
-  setOrder(null)
+  setBooking(null)
 
   router.push({
     name: 'booking-confirmation',
@@ -115,7 +115,7 @@ async function applyUserData() {
                       選擇房型
                     </h3>
                     <p class="mb-0 fw-medium">
-                      {{ order?.roomInfo.name }}
+                      {{ booking?.roomInfo.name }}
                     </p>
                   </div>
                   <button
@@ -131,10 +131,10 @@ async function applyUserData() {
                       訂房日期
                     </h3>
                     <p class="mb-2 fw-medium">
-                      入住：{{ formatDate(order?.checkInDate, 'M 月 D 日dddd') }}
+                      入住：{{ formatDate(booking?.checkInDate, 'M 月 D 日dddd') }}
                     </p>
                     <p class="mb-0 fw-medium">
-                      退房：{{ formatDate(order?.checkOutDate, 'M 月 D 日dddd') }}
+                      退房：{{ formatDate(booking?.checkOutDate, 'M 月 D 日dddd') }}
                     </p>
                   </div>
                   <button
@@ -150,7 +150,7 @@ async function applyUserData() {
                       房客人數
                     </h3>
                     <p class="mb-0 fw-medium">
-                      {{ order?.peopleNum }} 人
+                      {{ booking?.peopleNum }} 人
                     </p>
                   </div>
                   <button
@@ -286,19 +286,19 @@ async function applyUserData() {
                     <li class="card-info px-4 py-5 bg-neutral-0 border border-primary-40 rounded-3">
                       <Icon class="mb-2 fs-5 text-primary-100" icon="fluent:slide-size-24-filled" />
                       <p class="mb-0 fw-bold text-neutral-80 text-nowrap">
-                        {{ order?.roomInfo.areaInfo }}
+                        {{ booking?.roomInfo.areaInfo }}
                       </p>
                     </li>
                     <li class="card-info px-4 py-5 bg-neutral-0 border border-primary-40 rounded-3">
                       <Icon class="mb-2 fs-5 text-primary-100" icon="material-symbols:king-bed" />
                       <p class="mb-0 fw-bold text-neutral-80 text-nowrap">
-                        {{ order?.roomInfo.bedInfo }}
+                        {{ booking?.roomInfo.bedInfo }}
                       </p>
                     </li>
                     <li class="card-info px-4 py-5 bg-neutral-0 border border-primary-40 rounded-3">
                       <Icon class="mb-2 fs-5 text-primary-100" icon="ic:baseline-person" />
                       <p class="mb-0 fw-bold text-neutral-80 text-nowrap">
-                        {{ order?.roomInfo.maxPeople }} 人
+                        {{ booking?.roomInfo.maxPeople }} 人
                       </p>
                     </li>
                   </ul>
@@ -312,7 +312,7 @@ async function applyUserData() {
                     class="d-flex flex-wrap gap-6 gap-md-10 p-6 fs-8 fs-md-7 bg-neutral-0 rounded-3 list-unstyled"
                   >
                     <li
-                      v-for="(layout, index) in order?.roomInfo.layoutInfo" :key="index"
+                      v-for="(layout, index) in booking?.roomInfo.layoutInfo" :key="index"
                       class="d-flex gap-2"
                     >
                       <Icon class="fs-5 text-primary-100" icon="material-symbols:check" />
@@ -331,7 +331,7 @@ async function applyUserData() {
                     class="d-flex flex-wrap row-gap-2 column-gap-10 p-6 mb-0 fs-8 fs-md-7 bg-neutral-0 rounded-3 list-unstyled"
                   >
                     <li
-                      v-for="(facility, index) in order?.roomInfo.facilityInfo" :key="index"
+                      v-for="(facility, index) in booking?.roomInfo.facilityInfo" :key="index"
                       class="flex-item d-flex gap-2"
                     >
                       <Icon class="fs-5 text-primary-100" icon="material-symbols:check" />
@@ -350,7 +350,7 @@ async function applyUserData() {
                     class="d-flex flex-wrap row-gap-2 column-gap-10 p-6 mb-0 fs-8 fs-md-7 bg-neutral-0 rounded-3 list-unstyled"
                   >
                     <li
-                      v-for="(amenity, index) in order?.roomInfo.amenityInfo" :key="index"
+                      v-for="(amenity, index) in booking?.roomInfo.amenityInfo" :key="index"
                       class="flex-item d-flex gap-2"
                     >
                       <Icon class="fs-5 text-primary-100" icon="material-symbols:check" />
@@ -376,12 +376,12 @@ async function applyUserData() {
                 </h2>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <div class="d-flex align-items-center text-neutral-100 fw-medium">
-                    <span>{{ formatCurrency(order?.roomInfo.price) }}</span>
+                    <span>{{ formatCurrency(booking?.roomInfo.price) }}</span>
                     <Icon class="ms-2 me-1 text-neutral-80" icon="material-symbols:close" />
                     <span class="text-neutral-80">{{ daysCount }} 晚</span>
                   </div>
                   <span class="fw-medium">
-                    {{ formatCurrency((order?.roomInfo.price ?? 0) * daysCount) }}
+                    {{ formatCurrency((booking?.roomInfo.price ?? 0) * daysCount) }}
                   </span>
                 </div>
                 <div class="d-flex justify-content-between align-items-center fw-medium">
@@ -400,7 +400,7 @@ async function applyUserData() {
                     總價
                   </p>
                   <span>
-                    {{ formatCurrency((order?.roomInfo.price ?? 0) * daysCount - DISCOUNT) }}
+                    {{ formatCurrency((booking?.roomInfo.price ?? 0) * daysCount - DISCOUNT) }}
                   </span>
                 </div>
               </div>

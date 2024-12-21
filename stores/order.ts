@@ -1,4 +1,4 @@
-interface Order {
+interface Booking {
   roomId: string
   checkInDate: string
   checkOutDate: string
@@ -22,15 +22,15 @@ interface Order {
   }
 }
 
-export const useOrderStore = defineStore('order', () => {
-  const order = ref<Order | null>(null)
+export const useBookingStore = defineStore('booking', () => {
+  const booking = ref<Booking | null>(null)
 
-  const setOrder = (data: Order | null) => {
-    order.value = data
+  const setBooking = (data: Booking | null) => {
+    booking.value = data
   }
 
   return {
-    order,
-    setOrder,
+    booking,
+    setBooking,
   }
 })
