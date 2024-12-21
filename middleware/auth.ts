@@ -1,3 +1,5 @@
+import { CookieEnum } from '~/enums/cookie'
+
 export default defineNuxtRouteMiddleware(async () => {
   const nuxtApp = useNuxtApp()
 
@@ -10,7 +12,7 @@ export default defineNuxtRouteMiddleware(async () => {
 
   // middleware 要執行的 code 寫在這邊
 
-  const token = useCookie('accountToken')
+  const token = useCookie(CookieEnum.Auth)
   if (!token.value) {
     return navigateTo('/login')
   }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useUserLoginApi } from '~/api/services/user-login'
+import { CookieEnum } from '~/enums/cookie'
 
 definePageMeta({
   name: 'login',
@@ -25,7 +26,7 @@ async function onSubmit(values: Partial<typeof initialValues>) {
     return
   }
 
-  const token = useCookie('auth', {
+  const token = useCookie(CookieEnum.Auth, {
     maxAge: 60 * 60 * 24,
     path: '/',
   })

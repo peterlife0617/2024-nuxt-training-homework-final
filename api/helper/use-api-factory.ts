@@ -1,5 +1,6 @@
 import type { FetchOptions } from 'ofetch'
 import type { ValidateOptions } from '../types/validate-options'
+import { CookieEnum } from '~/enums/cookie'
 import { apiErrorHandler } from './api-error-handler'
 import { createOptions } from './create-options'
 
@@ -8,7 +9,7 @@ export function useApiFactory(fetch: typeof $fetch) {
     public: { apiUrl },
   } = useRuntimeConfig()
 
-  const token = useCookie('accountToken')
+  const token = useCookie(CookieEnum.Auth)
 
   return {
     get: <TResponse>(url: string, options?: FetchOptions, validateOptions?: ValidateOptions<TResponse>) => {

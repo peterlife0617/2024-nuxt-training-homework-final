@@ -2,6 +2,7 @@
 import { Icon } from '@iconify/vue'
 import { pick } from 'lodash-es'
 import { useUserSignupApi } from '~/api/services/user-signup'
+import { CookieEnum } from '~/enums/cookie'
 
 interface Step1Values {
   email: string
@@ -79,7 +80,7 @@ async function onStep2FormSubmit(values: any) {
     return
   }
 
-  const token = useCookie('auth', {
+  const token = useCookie(CookieEnum.Auth, {
     maxAge: 60 * 60 * 24,
     path: '/',
   })
