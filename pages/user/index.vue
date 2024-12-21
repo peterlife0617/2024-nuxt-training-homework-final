@@ -1,10 +1,9 @@
 <script setup lang="ts">
-const route = useRoute()
-navigateTo(`/user/${route.params.userId}/profile`)
+navigateTo(`/user/profile`)
 </script>
 
 <template>
-  <div>Index</div>
+  <div>d</div>
 </template>
 
 <style scoped lang="scss">

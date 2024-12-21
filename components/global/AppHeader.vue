@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { CookieEnum } from '~/enums/cookie'
 
 const route = useRoute()
+const router = useRouter()
+const token = useCookie(CookieEnum.Auth)
+const user = useCookie<{ name: string, email: string } | null >(CookieEnum.User)
+
 const transparentBgRoute = ['home', 'rooms']
 
 const isTransparentRoute = computed(() => transparentBgRoute.includes(route.name as string))
@@ -19,6 +24,12 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
+
+function logout() {
+  token.value = null
+  user.value = null
+  router.push('/account/login')
+}
 </script>
 
 <template>
@@ -27,95 +38,65 @@ onUnmounted(() => {
       'scrolled': isScrolled,
       'bg-transparent': isTransparentRoute,
       'bg-neutral-120': !isTransparentRoute,
-    }"
-    class="position-fixed top-0 z-3 w-100"
+    }" class="position-fixed top-0 z-3 w-100"
   >
     <nav class="navbar navbar-expand-md p-0 px-3 py-4 px-md-20 py-md-6">
       <div class="container-fluid justify-content-between p-0">
-        <NuxtLink
-          class="navbar-brand p-0"
-          to="/"
-        >
-          <img
-            src="/images/logo-white.svg"
-            alt="logo"
-            class="logo img-fluid"
-          >
+        <NuxtLink class="navbar-brand p-0" to="/">
+          <img src="/images/logo-white.svg" alt="logo" class="logo img-fluid">
         </NuxtLink>
         <button
-          class="navbar-toggler collapsed p-2 text-white border-0 shadow-none"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbar"
-          aria-controls="navbar"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
+          class="navbar-toggler collapsed p-2 text-white border-0 shadow-none" type="button"
+          data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar"
+          aria-expanded="false" aria-label="Toggle navigation"
         >
-          <Icon
-            class="fs-1"
-            icon="mdi:close"
-          />
-          <Icon
-            class="fs-5"
-            icon="mdi:menu"
-          />
+          <Icon class="fs-1" icon="mdi:close" />
+          <Icon class="fs-5" icon="mdi:menu" />
         </button>
-        <div
-          id="navbar"
-          class="collapse navbar-collapse"
-        >
+        <div id="navbar" class="collapse navbar-collapse">
           <ul class="navbar-nav gap-4 ms-auto fw-bold">
             <li class="nav-item">
               <NuxtLink
                 :to="{
                   name: 'rooms',
-                }"
-                class="nav-link p-4 text-neutral-0"
+                }" class="nav-link p-4 text-neutral-0"
               >
                 客房旅宿
               </NuxtLink>
             </li>
-            <li class="d-none d-md-block nav-item">
+            <li v-if="user" class="d-none d-md-block nav-item">
               <div class="btn-group">
                 <button
-                  type="button"
-                  class="nav-link d-flex gap-2 p-4 text-neutral-0"
+                  type="button" class="nav-link d-flex gap-2 p-4 text-neutral-0"
                   data-bs-toggle="dropdown"
                 >
-                  <Icon
-                    class="fs-5"
-                    icon="mdi:account-circle-outline"
-                  />
-                  Jessica
+                  <Icon class="fs-5" icon="mdi:account-circle-outline" />
+                  {{ user.name }}
                 </button>
                 <ul
                   class="dropdown-menu py-3 overflow-hidden"
                   style="right: 0; left: auto; border-radius: 20px;"
                 >
                   <li>
-                    <NuxtLink
-                      class="dropdown-item px-6 py-4"
-                      to="/user/1/profile"
-                    >
+                    <NuxtLink class="dropdown-item px-6 py-4" to="/user/profile">
                       我的帳戶
                     </NuxtLink>
                   </li>
                   <li>
-                    <NuxtLink
-                      class="dropdown-item px-6 py-4"
-                      to="/account/login"
-                    >
+                    <button class="dropdown-item px-6 py-4" @click="logout">
                       登出
-                    </NuxtLink>
+                    </button>
                   </li>
                 </ul>
               </div>
             </li>
+            <li v-else class="d-none d-md-block nav-item">
+              <NuxtLink to="/account/login" class="nav-link p-4 text-neutral-0">
+                會員登入
+              </NuxtLink>
+            </li>
             <li class="d-md-none nav-item">
-              <NuxtLink
-                to="/"
-                class="nav-link p-4 text-neutral-0"
-              >
+              <NuxtLink to="/account/login" class="nav-link p-4 text-neutral-0">
                 會員登入
               </NuxtLink>
             </li>
@@ -123,8 +104,7 @@ onUnmounted(() => {
               <NuxtLink
                 :to="{
                   name: 'rooms',
-                }"
-                class="btn btn-primary-100 px-8 py-4 text-white fw-bold border-0 rounded-3"
+                }" class="btn btn-primary-100 px-8 py-4 text-white fw-bold border-0 rounded-3"
               >
                 立即訂房
               </NuxtLink>
@@ -177,16 +157,19 @@ header.scrolled {
       visibility: visible;
       opacity: 1;
     }
+
     svg:nth-child(2) {
       visibility: hidden;
       opacity: 0;
     }
   }
+
   .navbar-toggler.collapsed {
     svg:nth-child(1) {
       visibility: hidden;
       opacity: 0;
     }
+
     svg:nth-child(2) {
       visibility: visible;
       opacity: 1;
@@ -202,9 +185,11 @@ header.scrolled {
     opacity: 0;
     transition: opacity 0.05s;
   }
+
   .navbar-collapse.show {
     opacity: 1;
   }
+
   .navbar-nav {
     align-items: center;
     justify-content: center;

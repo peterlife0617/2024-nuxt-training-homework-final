@@ -17,6 +17,8 @@ interface Step2Values {
   address: {
     zipcode: null | number
     detail: string
+    county: string
+    city: string
   }
 }
 
@@ -40,6 +42,8 @@ const initialValues: {
     address: {
       zipcode: null,
       detail: '',
+      county: '',
+      city: '',
     },
   },
 }
@@ -60,7 +64,8 @@ if (import.meta.dev) {
   initialValues.step2.name = '王小明'
   initialValues.step2.phone = '0912345678'
   initialValues.step2.birthday = '1990/1/1'
-  initialValues.step2.address.zipcode = 800
+  initialValues.step2.address.city = '高雄市'
+  initialValues.step2.address.county = '前金區'
   initialValues.step2.address.detail = '信義路 123 號'
 }
 
@@ -71,6 +76,10 @@ async function onStep1FormSubmit() {
 async function onStep2FormSubmit(values: any) {
   const signupValues = {
     ...values,
+    address: {
+      ...values.address,
+      zipcode: 800,
+    },
     ...pick(step1FormRef.value?.values, ['email', 'password']),
   }
 
@@ -84,7 +93,15 @@ async function onStep2FormSubmit(values: any) {
     maxAge: 60 * 60 * 24,
     path: '/',
   })
+  const user = useCookie<{ name: string, email: string } | null>(CookieEnum.User, {
+    maxAge: 60 * 60 * 24,
+    path: '/',
+  })
   token.value = response.token
+  user.value = {
+    name: response.result.name,
+    email: response.result.email,
+  }
   await success('登入成功')
   router.push('/')
 }
@@ -108,12 +125,6 @@ function getBirthdayWithDay(event: Event, birthday?: string) {
   const target = event.target as HTMLSelectElement | null
   const day = target?.value
   return `${year}/${month}/${day}`
-}
-
-function getZipcode(event: Event) {
-  const target = event.target as HTMLSelectElement | null
-  const zipcode = target?.value
-  return zipcode
 }
 </script>
 
@@ -237,7 +248,6 @@ function getZipcode(event: Event) {
         <div class="mb-4 fs-8 fs-md-7">
           <label class="mb-2 text-neutral-0 fw-bold" for="birth">
             生日
-            <DevOnly> {{ values.birthday }}</DevOnly>
           </label>
           <VField
             v-slot="{ setValue, value }" as="div" :class="{ 'is-invalid': errors.birthday }"
@@ -282,48 +292,52 @@ function getZipcode(event: Event) {
             地址
           </label>
           <div>
-            <VField
-              v-slot="{ setValue, value }" as="div" name="address.zipcode" class="d-flex gap-2 mb-2"
-              rules="required" label="縣市" :class="{ 'is-invalid': errors['address.zipcode'] }"
-            >
-              <select
-                :class="{ 'is-invalid': errors['address.zipcode'] }"
-                class="form-select p-4 text-neutral-80 fw-medium rounded-3" @input.stop
-                @change.stop
-              >
-                <option value="">
-                  請選擇
-                </option>
-                <option value="臺北市">
-                  臺北市
-                </option>
-                <option value="臺中市">
-                  臺中市
-                </option>
-                <option value="高雄市">
-                  高雄市
-                </option>
-              </select>
-              <select
-                :class="{ 'is-invalid': errors['address.zipcode'] }"
-                class="form-select p-4 text-neutral-80 fw-medium rounded-3" :value="value"
-                @input.stop
-                @change.stop="setValue(getZipcode($event))"
-              >
-                <option :value="null">
-                  請選擇
-                </option>
-                <option :value="800">
-                  前金區
-                </option>
-                <option :value="801">
-                  鹽埕區
-                </option>
-                <option :value="802">
-                  新興區
-                </option>
-              </select>
-            </VField>
+            <div class="d-flex gap-2 mb-2">
+              <div class="flex-grow-1">
+                <VField
+                  as="select" name="address.city"
+                  :class="{ 'is-invalid': errors['address.city'] }"
+                  class="form-select p-4 text-neutral-80 fw-medium rounded-3" rules="required"
+                  label="縣市"
+                >
+                  <option value="">
+                    請選擇
+                  </option>
+                  <option value="臺北市">
+                    臺北市
+                  </option>
+                  <option value="臺中市">
+                    臺中市
+                  </option>
+                  <option value="高雄市">
+                    高雄市
+                  </option>
+                </VField>
+                <VErrorMessage name="address.city" class="invalid-feedback" />
+              </div>
+              <div class="flex-grow-1">
+                <VField
+                  as="select" name="address.county"
+                  :class="{ 'is-invalid': errors['address.county'] }"
+                  class="form-select p-4 text-neutral-80 fw-medium rounded-3" rules="required"
+                  label="鄉鎮市區"
+                >
+                  <option value="">
+                    請選擇
+                  </option>
+                  <option value="前金區">
+                    前金區
+                  </option>
+                  <option value="鹽埕區">
+                    鹽埕區
+                  </option>
+                  <option value="option">
+                    新興區
+                  </option>
+                </VField>
+                <VErrorMessage name="address.county" class="invalid-feedback" />
+              </div>
+            </div>
             <VErrorMessage name="address.zipcode" class="invalid-feedback" />
             <VField
               id="address" name="address.detail" type="text"

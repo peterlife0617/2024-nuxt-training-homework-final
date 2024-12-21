@@ -11,7 +11,7 @@ const initialValues = {
   password: '',
 }
 if (import.meta.dev) {
-  initialValues.email = 'exampleaa@example.com'
+  initialValues.email = 'example21@gmail.com'
   initialValues.password = 'a12345678'
 }
 
@@ -30,7 +30,19 @@ async function onSubmit(values: Partial<typeof initialValues>) {
     maxAge: 60 * 60 * 24,
     path: '/',
   })
+
+  const user = useCookie<{ name: string, email: string } | null>(CookieEnum.User, {
+    maxAge: 60 * 60 * 24,
+    path: '/',
+  })
+
   token.value = response.token
+
+  user.value = {
+    name: response.result.name,
+    email: response.result.email,
+  }
+
   await success('登入成功')
   router.push('/')
 }

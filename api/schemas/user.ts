@@ -5,8 +5,8 @@ export const userSchema = z.object({
   address: z.object({
     zipcode: z.number(),
     detail: z.string(),
-    city: z.string(),
-    county: z.string(),
+    city: z.string().optional(),
+    county: z.string().optional(),
   }),
   _id: z.string(),
   name: z.string(),
@@ -15,11 +15,18 @@ export const userSchema = z.object({
   birthday: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  id: z.string(),
 })
 
-export const userResponseSchema = apiResponseSchema(userSchema).merge(z.object({
-  token: z.string(),
-}))
+export const userResponseSchema = apiResponseSchema(userSchema)
+export const updateUserResponseSchema = z.discriminatedUnion('status', [
+  z.object({
+    status: z.literal(true),
+  }),
+  z.object({
+    status: z.literal(false),
+    message: z.string(),
+  }),
+])
 
 export type UserResponse = z.infer<typeof userResponseSchema>
+export type UpdateUserResponse = z.infer<typeof updateUserResponseSchema>

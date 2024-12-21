@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import type { UserResponse } from '~/api/schemas/user'
+
+const props = defineProps<{
+  user: UserResponse['result']
+}>()
 </script>
 
 <template>
@@ -24,7 +29,7 @@
             alt="avatar"
           >
           <h1 class="text-neutral-0 fw-bold">
-            Hello，Jessica
+            Hello，{{ props.user.name }}
           </h1>
         </div>
       </div>
