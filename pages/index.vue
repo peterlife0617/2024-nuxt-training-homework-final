@@ -3,18 +3,18 @@ import { Icon } from '@iconify/vue'
 import { Autoplay, Navigation, Pagination } from 'swiper/modules'
 import { useHomeCulinaryApi } from '~/api/services/home-culinary'
 import { useHomeNewsApi } from '~/api/services/home-news'
-import { useRoomApi } from '~/api/services/room'
+import { useRoomsApi } from '~/api/services/rooms'
 
 definePageMeta({
   name: 'home',
 })
 
-const { getRoomList } = useRoomApi()
-const { getHomeNewsList } = useHomeNewsApi()
-const { getHomeCulinaryList } = useHomeCulinaryApi()
+const { getRooms } = useRoomsApi()
+const { getHomeNews } = useHomeNewsApi()
+const { getHomeCulinary } = useHomeCulinaryApi()
 
 const { data } = await useAsyncData(async () => {
-  const [roomList, homeNewsList, culinaryList] = await getApiData([getRoomList(), getHomeNewsList(), getHomeCulinaryList()])
+  const [roomList, homeNewsList, culinaryList] = await getApiData([getRooms(), getHomeNews(), getHomeCulinary()])
   return {
     roomList: roomList?.result,
     homeNewsList: homeNewsList?.result,

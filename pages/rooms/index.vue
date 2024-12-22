@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { Autoplay, Navigation, Pagination } from 'swiper/modules'
-import { useRoomApi } from '~/api/services/room'
+import { useRoomsApi } from '~/api/services/rooms'
 
 definePageMeta({
   name: 'rooms',
 })
 
-const { getRoomList } = useRoomApi()
+const { getRooms } = useRoomsApi()
 
 const { data: roomList } = await useAsyncData(() => {
-  return getRoomList().then(res => res?.result)
+  return getRooms().then(res => res?.result)
 })
 const modules = [Autoplay, Navigation, Pagination]
 </script>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import { useOrdersApi } from '~/api/services/orders'
+import { useOrdersDetailApi } from '~/api/services/orders-[id]'
 
 definePageMeta({
   name: 'booking-confirmation',
 })
 const route = useRoute()
-const { getOrderDetail } = useOrdersApi()
+const { getOrderDetail } = useOrdersDetailApi()
 const { data } = await useAsyncData(() => getOrderDetail(route.params.bookingId as string), {
   transform: (data) => {
     return data?.result

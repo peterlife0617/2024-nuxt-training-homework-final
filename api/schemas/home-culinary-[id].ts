@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { apiResponseSchema } from '../helper/api-response-schema'
 
-export const homeCulinarySchema = z.array(z.object({
+export const homeCulinaryDetailSchema = z.object({
   _id: z.string(),
   title: z.string(),
   description: z.string(),
@@ -9,8 +9,8 @@ export const homeCulinarySchema = z.array(z.object({
   image: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
-}))
+})
 
-export const homeCulinaryResponseSchema = apiResponseSchema(homeCulinarySchema)
+export const homeCulinaryDetailResponseSchema = apiResponseSchema(homeCulinaryDetailSchema)
 
-export type HomeCulinaryResponse = z.infer<typeof homeCulinaryResponseSchema>
+export type HomeCulinaryDetailResponse = z.infer<typeof homeCulinaryDetailResponseSchema>

@@ -1,7 +1,7 @@
 import { FetchError, type FetchOptions } from 'ofetch'
 import { useApiFactory } from '../helper/use-api-factory'
 import { apiInstance } from '../instance'
-import { orderDetailDeleteResponseSchema, orderDetailResponseSchema, type OrdersCreateResponse, ordersCreateResponseSchema, ordersResponseSchema } from '../schemas/orders'
+import { type OrdersCreateResponse, ordersCreateResponseSchema, ordersResponseSchema } from '../schemas/orders'
 
 export function useOrdersApi() {
   const BASE_PATH = '/orders'
@@ -16,7 +16,5 @@ export function useOrdersApi() {
       }
       return Promise.reject(error)
     }),
-    getOrderDetail: (id: string, options?: FetchOptions) => api.get(`${BASE_PATH}/${id}`, options, { responseSchema: orderDetailResponseSchema }),
-    deleteOrderDetail: (id: string, options?: FetchOptions) => api.delete(`${BASE_PATH}/${id}`, options, { responseSchema: orderDetailDeleteResponseSchema }),
   }
 }

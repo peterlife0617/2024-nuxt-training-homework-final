@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { chunk, cloneDeep, isNil } from 'lodash-es'
-import { useRoomApi } from '~/api/services/room'
+import { useRoomsDetailApi } from '~/api/services/rooms-[id]'
 
 definePageMeta({
   name: 'room-detail',
@@ -10,7 +10,7 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 
-const { getRoom } = useRoomApi()
+const { getRoom } = useRoomsDetailApi()
 
 const { data } = await useAsyncData(async () => {
   return await getRoom(route.params.roomId as string)

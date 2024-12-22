@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RoomResponse } from '~/api/schemas/room'
+import type { RoomsDetailResponse } from '~/api/schemas/rooms-[id]'
 import { Icon } from '@iconify/vue'
 import { isNil } from 'lodash-es'
 import { DatePicker } from 'v-calendar'
@@ -31,7 +31,7 @@ const props = defineProps<{
     minDate: string | Date
     maxDate: string | Date
   }
-  roomData?: RoomResponse['result'] | null
+  roomData?: RoomsDetailResponse['result'] | null
 }>()
 
 const masks = {

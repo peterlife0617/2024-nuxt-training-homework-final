@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { useOrdersApi } from '~/api/services/orders'
+import { useOrdersDetailApi } from '~/api/services/orders-[id]'
 import { OrderStatusEnum } from '~/enums/order-status'
 
 definePageMeta({
   name: 'user-order',
 })
 
-const { getOrders, deleteOrderDetail } = useOrdersApi()
+const { getOrders } = useOrdersApi()
+const { deleteOrderDetail } = useOrdersDetailApi()
+
 const { data, refresh } = await useAsyncData(() => getOrders(), {
   transform: (data) => {
     return data?.result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
