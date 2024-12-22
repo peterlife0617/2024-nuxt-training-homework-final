@@ -1,0 +1,18 @@
+{
+  "Zod API Schema": {
+    "prefix": "!zod-schema",
+    "body": [
+      "import { z } from 'zod'",
+      "import { apiResponseSchema } from '../helper/api-response-schema'",
+      "",
+      "export const ${TM_FILENAME_BASE/^([^-\\[]+).*$/$1/}${TM_FILENAME_BASE/^[^\\[]*(\\[.*)?$/${1:+Detail}/}Schema = z.object({",
+      "  $0",
+      "})",
+      "",
+      "export const ${TM_FILENAME_BASE/^([^-\\[]+).*$/$1/}${TM_FILENAME_BASE/^[^\\[]*(\\[.*)?$/${1:+Detail}/}ResponseSchema = apiResponseSchema(${TM_FILENAME_BASE/^([^-\\[]+).*$/$1/}${TM_FILENAME_BASE/^[^\\[]*(\\[.*)?$/${1:+Detail}/}Schema)",
+      "",
+      "export type ${TM_FILENAME_BASE/^([^-\\[]+).*$/$1/}${TM_FILENAME_BASE/^[^\\[]*(\\[.*)?$/${1:+Detail}/}Response = z.infer<typeof ${TM_FILENAME_BASE/^([^-\\[]+).*$/$1/}${TM_FILENAME_BASE/^[^\\[]*(\\[.*)?$/${1:+Detail}/}ResponseSchema>"
+    ],
+    "description": "Create a Zod schema for API response (auto-detect detail/list by filename)"
+  }
+}

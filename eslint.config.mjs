@@ -29,7 +29,7 @@ export default withNuxt(
       'no-alert': 'warn',
       'unicorn/filename-case': ['error', {
         case: 'kebabCase',
-        ignore: [/\.vue$/, /\.md$/],
+        ignore: [/\.vue$/, /\.md$/, /[^\n\r[\u2028\u2029]*\[(?:[^\n\r\]\u2028\u2029]*\][^\n\r[\u2028\u2029]*\[)*(?:[\n\r\u2028\u2029][^\]]*|[^\n\r\]\u2028\u2029]+(?:[\n\r\u2028\u2029][^\]]*)?)\].*\.ts$/],
       }],
     },
   }),
