@@ -2,29 +2,9 @@
 import type { Collapse } from 'bootstrap'
 import { Icon } from '@iconify/vue'
 
-const { $collapse } = useNuxtApp()
 const navbarRef = useTemplateRef('navbar')
-const navbarInstance = ref<Collapse | null>(null)
 
-function closeNavbar() {
-  navbarInstance.value?.hide()
-}
-
-function toggleNavbar() {
-  navbarInstance.value?.toggle()
-}
-
-onMounted(() => {
-  if (navbarRef.value) {
-    navbarInstance.value = new $collapse(navbarRef.value, {
-      toggle: false,
-    })
-  }
-})
-
-onUnmounted(() => {
-  navbarInstance.value?.dispose()
-})
+const { toggle, close, collapsed } = useCollapse(navbarRef)
 </script>
 
 <template>
@@ -36,21 +16,22 @@ onUnmounted(() => {
             <img src="/images/logo-white.svg" alt="logo" class="logo img-fluid">
           </NuxtLink>
           <button
-            class="navbar-toggler collapsed p-2 text-white border-0 shadow-none" type="button"
+            :class="{ collapsed }"
+            class="navbar-toggler p-2 text-white border-0 shadow-none" type="button"
             aria-controls="navbar" aria-expanded="false"
-            aria-label="Toggle navigation" @click="toggleNavbar"
+            aria-label="Toggle navigation" @click="toggle"
           >
             <Icon class="fs-1" icon="mdi:close" />
             <Icon class="fs-5" icon="mdi:menu" />
           </button>
-          <div ref="navbar" class="collapse navbar-collapse">
+          <Collapse ref="navbar" class="navbar-collapse">
             <ul class="d-md-none navbar-nav gap-4 ms-auto fw-bold">
               <li class="nav-item">
-                <NuxtLink to="/" class="nav-link p-4 text-neutral-0" @click="closeNavbar">
+                <NuxtLink to="/" class="nav-link p-4 text-neutral-0" @click="close">
                   客房旅宿
                 </NuxtLink>
               </li>
-              <li class="nav-item" @click="closeNavbar">
+              <li class="nav-item" @click="close">
                 <NuxtLink to="/" class="nav-link p-4 text-neutral-0">
                   會員登入
                 </NuxtLink>
@@ -59,13 +40,13 @@ onUnmounted(() => {
                 <NuxtLink
                   to="/"
                   class="btn btn-primary-100 px-8 py-4 text-white fw-bold border-0 rounded-3"
-                  @click="closeNavbar"
+                  @click="close"
                 >
                   立即訂房
                 </NuxtLink>
               </li>
             </ul>
-          </div>
+          </Collapse>
         </div>
       </nav>
     </header>
