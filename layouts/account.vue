@@ -1,5 +1,30 @@
 <script setup lang="ts">
+import type { Collapse } from 'bootstrap'
 import { Icon } from '@iconify/vue'
+
+const { $collapse } = useNuxtApp()
+const navbarRef = useTemplateRef('navbar')
+const navbarInstance = ref<Collapse | null>(null)
+
+function closeNavbar() {
+  navbarInstance.value?.hide()
+}
+
+function toggleNavbar() {
+  navbarInstance.value?.toggle()
+}
+
+onMounted(() => {
+  if (navbarRef.value) {
+    navbarInstance.value = new $collapse(navbarRef.value, {
+      toggle: false,
+    })
+  }
+})
+
+onUnmounted(() => {
+  navbarInstance.value?.dispose()
+})
 </script>
 
 <template>
@@ -12,26 +37,20 @@ import { Icon } from '@iconify/vue'
           </NuxtLink>
           <button
             class="navbar-toggler collapsed p-2 text-white border-0 shadow-none" type="button"
-            data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar"
-            aria-expanded="false" aria-label="Toggle navigation"
+            aria-controls="navbar" aria-expanded="false"
+            aria-label="Toggle navigation" @click="toggleNavbar"
           >
             <Icon class="fs-1" icon="mdi:close" />
             <Icon class="fs-5" icon="mdi:menu" />
           </button>
-          <div id="navbar" class="collapse navbar-collapse">
+          <div ref="navbar" class="collapse navbar-collapse">
             <ul class="d-md-none navbar-nav gap-4 ms-auto fw-bold">
               <li class="nav-item">
-                <NuxtLink to="/" class="nav-link p-4 text-neutral-0">
+                <NuxtLink to="/" class="nav-link p-4 text-neutral-0" @click="closeNavbar">
                   客房旅宿
                 </NuxtLink>
               </li>
-              <li class="d-none d-md-block nav-item">
-                <NuxtLink to="/" class="nav-link d-flex gap-2 p-4 text-neutral-0">
-                  <Icon class="fs-5" icon="mdi:account-circle-outline" />
-                  Jessica
-                </NuxtLink>
-              </li>
-              <li class="d-md-none nav-item">
+              <li class="nav-item" @click="closeNavbar">
                 <NuxtLink to="/" class="nav-link p-4 text-neutral-0">
                   會員登入
                 </NuxtLink>
@@ -40,6 +59,7 @@ import { Icon } from '@iconify/vue'
                 <NuxtLink
                   to="/"
                   class="btn btn-primary-100 px-8 py-4 text-white fw-bold border-0 rounded-3"
+                  @click="closeNavbar"
                 >
                   立即訂房
                 </NuxtLink>

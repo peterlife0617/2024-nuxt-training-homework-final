@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Collapse } from 'bootstrap'
 import { Icon } from '@iconify/vue'
 import { useUserApi } from '~/api/services/user'
 import { CookieEnum } from '~/enums/cookie'
@@ -23,7 +24,9 @@ await useAsyncData(async () => {
 
 const route = useRoute()
 const router = useRouter()
-
+const { $collapse } = useNuxtApp()
+const navbarRef = useTemplateRef('navbar')
+const navbarInstance = ref<Collapse | null>(null)
 const isScrolled = ref(false)
 
 const isTransparentRoute = computed(() => transparentBgRoute.includes(route.name as string))
@@ -32,19 +35,33 @@ function handleScroll() {
   isScrolled.value = window.scrollY > 50
 }
 
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
-
 function logout() {
   token.value = null
   setUser(null)
   router.push('/account/login')
 }
+
+function closeNavbar() {
+  navbarInstance.value?.hide()
+}
+
+function toggleNavbar() {
+  navbarInstance.value?.toggle()
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+  if (navbarRef.value) {
+    navbarInstance.value = new $collapse(navbarRef.value, {
+      toggle: false,
+    })
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+  navbarInstance.value?.dispose()
+})
 </script>
 
 <template>
@@ -62,19 +79,20 @@ function logout() {
         </NuxtLink>
         <button
           class="navbar-toggler collapsed p-2 text-white border-0 shadow-none" type="button"
-          data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar"
-          aria-expanded="false" aria-label="Toggle navigation"
+          aria-controls="navbar" aria-expanded="false"
+          aria-label="Toggle navigation" @click="toggleNavbar"
         >
           <Icon class="fs-1" icon="mdi:close" />
           <Icon class="fs-5" icon="mdi:menu" />
         </button>
-        <div id="navbar" class="collapse navbar-collapse">
+        <div ref="navbar" class="collapse navbar-collapse">
           <ul class="navbar-nav gap-4 ms-auto fw-bold">
             <li class="nav-item">
               <NuxtLink
                 :to="{
                   name: 'rooms',
                 }" class="nav-link p-4 text-neutral-0"
+                @click="closeNavbar"
               >
                 客房旅宿
               </NuxtLink>
@@ -113,7 +131,7 @@ function logout() {
               </li>
             </ClientOnly>
             <li class="d-md-none nav-item">
-              <NuxtLink to="/account/login" class="nav-link p-4 text-neutral-0">
+              <NuxtLink to="/account/login" class="nav-link p-4 text-neutral-0" @click="closeNavbar">
                 會員登入
               </NuxtLink>
             </li>
@@ -122,6 +140,7 @@ function logout() {
                 :to="{
                   name: 'rooms',
                 }" class="btn btn-primary-100 px-8 py-4 text-white fw-bold border-0 rounded-3"
+                @click="closeNavbar"
               >
                 立即訂房
               </NuxtLink>
