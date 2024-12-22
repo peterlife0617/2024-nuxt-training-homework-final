@@ -4,10 +4,10 @@
 
 ## 使用方式
 
-使用 `!zod-schema` 指令：
+使用 `!api-schema` 指令：
 
 - 系統會自動根據檔名判斷是一般或詳細資料的 schema
-- 輸入 `!zod-schema` 後按 Tab
+- 輸入 `!api-schema` 後按 Tab
 - 在物件內加入需要的欄位定義
 
 ## 命名規則

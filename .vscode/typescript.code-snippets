@@ -1,6 +1,6 @@
 {
-  "Zod API Schema": {
-    "prefix": "!zod-schema",
+  "API Schema Template": {
+    "prefix": "!api-schema",
     "body": [
       "import { z } from 'zod'",
       "import { apiResponseSchema } from '../helper/api-response-schema'",
@@ -14,5 +14,26 @@
       "export type ${TM_FILENAME_BASE/^([^-\\[]+).*$/$1/}${TM_FILENAME_BASE/^[^\\[]*(\\[.*)?$/${1:+Detail}/}Response = z.infer<typeof ${TM_FILENAME_BASE/^([^-\\[]+).*$/$1/}${TM_FILENAME_BASE/^[^\\[]*(\\[.*)?$/${1:+Detail}/}ResponseSchema>"
     ],
     "description": "Create a Zod schema for API response (auto-detect detail/list by filename)"
+  },
+  "API Service Template": {
+    "prefix": "!api-service",
+    "body": [
+      "import type { FetchOptions } from 'ofetch'",
+      "import { useApiFactory } from '../helper/use-api-factory'",
+      "import { apiInstance } from '../instance'",
+      "",
+      "export function use${TM_FILENAME_BASE/^([^-\\[]+).*$/${1:/pascalcase}/}${TM_FILENAME_BASE/^[^\\[]*(\\[.*)?$/${1:+Detail}/}Api() {",
+      "",
+      "  const BASE_PATH = '/${TM_FILENAME_BASE/^([^-\\[]+).*$/$1/}'",
+      "  // const DETAIL_PATH = (id: string) => `\\${BASE_PATH\\}/\\${id\\}`",
+      "",
+      "  const api = useApiFactory(apiInstance)",
+      "",
+      "  return {",
+      "    $0",
+      "  }",
+      "}"
+    ],
+    "description": "Create an API service with auto-detection for detail/list endpoints"
   }
 }
