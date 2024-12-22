@@ -1,14 +1,28 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { useUserApi } from '~/api/services/user'
 import { CookieEnum } from '~/enums/cookie'
 
 const transparentBgRoute = ['home', 'rooms']
 
-const route = useRoute()
-const router = useRouter()
 const token = useCookie(CookieEnum.Auth)
 const { user } = storeToRefs(useUserStore())
 const { setUser } = useUserStore()
+const { getUser } = useUserApi()
+await useAsyncData(async () => {
+  if (user.value) {
+    return Promise.resolve(true)
+  }
+  if (!token.value) {
+    return Promise.resolve(true)
+  }
+  const response = await getUser()
+  setUser(response?.result ?? null)
+  return Promise.resolve(true)
+})
+
+const route = useRoute()
+const router = useRouter()
 
 const isScrolled = ref(false)
 
@@ -65,37 +79,39 @@ function logout() {
                 客房旅宿
               </NuxtLink>
             </li>
-            <li v-if="user" class="d-none d-md-block nav-item">
-              <div class="btn-group">
-                <button
-                  type="button" class="nav-link d-flex gap-2 p-4 text-neutral-0"
-                  data-bs-toggle="dropdown"
-                >
-                  <Icon class="fs-5" icon="mdi:account-circle-outline" />
-                  {{ user.name }}
-                </button>
-                <ul
-                  class="dropdown-menu py-3 overflow-hidden"
-                  style="right: 0; left: auto; border-radius: 20px;"
-                >
-                  <li>
-                    <NuxtLink class="dropdown-item px-6 py-4" to="/user/profile">
-                      我的帳戶
-                    </NuxtLink>
-                  </li>
-                  <li>
-                    <button class="dropdown-item px-6 py-4" @click="logout">
-                      登出
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            <li v-else class="d-none d-md-block nav-item">
-              <NuxtLink to="/account/login" class="nav-link p-4 text-neutral-0">
-                會員登入
-              </NuxtLink>
-            </li>
+            <ClientOnly>
+              <li v-if="user" class="d-none d-md-block nav-item">
+                <div class="btn-group">
+                  <button
+                    type="button" class="nav-link d-flex gap-2 p-4 text-neutral-0"
+                    data-bs-toggle="dropdown"
+                  >
+                    <Icon class="fs-5" icon="mdi:account-circle-outline" />
+                    {{ user.name }}
+                  </button>
+                  <ul
+                    class="dropdown-menu py-3 overflow-hidden"
+                    style="right: 0; left: auto; border-radius: 20px;"
+                  >
+                    <li>
+                      <NuxtLink class="dropdown-item px-6 py-4" to="/user/profile">
+                        我的帳戶
+                      </NuxtLink>
+                    </li>
+                    <li>
+                      <button class="dropdown-item px-6 py-4" @click="logout">
+                        登出
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li v-else class="d-none d-md-block nav-item">
+                <NuxtLink to="/account/login" class="nav-link p-4 text-neutral-0">
+                  會員登入
+                </NuxtLink>
+              </li>
+            </ClientOnly>
             <li class="d-md-none nav-item">
               <NuxtLink to="/account/login" class="nav-link p-4 text-neutral-0">
                 會員登入
