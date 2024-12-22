@@ -1,5 +1,5 @@
 import type { FetchOptions } from 'ofetch'
-import { useApiFactory } from '../helper/use-api-factory'
+import { useApiFactory } from '../composables/use-api-factory'
 import { apiInstance } from '../instance'
 import { homeCulinaryDetailResponseSchema } from '../schemas/home-culinary-[id]'
 

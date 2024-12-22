@@ -1,8 +1,8 @@
 import type { FetchOptions } from 'ofetch'
 import type { ValidateOptions } from '../types/validate-options'
 import { CookieEnum } from '~/enums/cookie'
-import { apiErrorHandler } from './api-error-handler'
-import { createOptions } from './create-options'
+import { apiErrorHandler } from '../helper/api-error-handler'
+import { createOptions } from '../helper/create-options'
 
 export function useApiFactory(fetch: typeof $fetch) {
   const {

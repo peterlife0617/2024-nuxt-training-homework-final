@@ -1,5 +1,5 @@
 import { FetchError, type FetchOptions } from 'ofetch'
-import { useApiFactory } from '../helper/use-api-factory'
+import { useApiFactory } from '../composables/use-api-factory'
 import { apiInstance } from '../instance'
 import { type UserLoginResponse, userLoginResponseSchema } from '../schemas/user-login'
 
