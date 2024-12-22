@@ -1,6 +1,9 @@
-# Nuxt Minimal Starter
+# 最終作業
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+## DEMO
+
+[Render](https://two024-nuxt-training-homework03.onrender.com/)
+[Zeabur](https://nuxt-training-homework-final.zeabur.app/)
 
 ## Setup
 
@@ -9,33 +12,23 @@ Make sure to install dependencies:
 ```bash
 # npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
 ## Development Server
+
+1. 複製 `.env.example` 為 `.env` 檔案
+2. 設定環境變數:
+
+```properties
+# API
+NUXT_PUBLIC_API_URL=https://nuxr3.zeabur.app/api/v1
+```
 
 Start the development server on `http://localhost:3000`:
 
 ```bash
 # npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
 ## Production
@@ -45,15 +38,6 @@ Build the application for production:
 ```bash
 # npm
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
 Locally preview production build:
@@ -61,15 +45,4 @@ Locally preview production build:
 ```bash
 # npm
 npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
