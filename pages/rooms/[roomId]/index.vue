@@ -337,12 +337,12 @@ function bookingNow() {
               formatDate(bookingDate.date?.start, 'MM / DD') }} - {{
               formatDate(bookingDate.date?.end, 'MM / DD') }}</span>
           </div>
-          <NuxtLink
-            :to="{ name: 'booking', params: { roomId: $route.params.roomId } }"
+          <button
             class="btn btn-primary-100 px-12 py-4 text-neutral-0 fw-bold rounded-3"
+            @click="bookingNow"
           >
             立即預訂
-          </NuxtLink>
+          </button>
         </template>
       </div>
     </section>
